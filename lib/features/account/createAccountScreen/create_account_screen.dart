@@ -25,7 +25,6 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
   VoidCallback _onCreatedAccountPressed(BuildContext context) {
     return () {
       final String accountName = nameController.value.text;
-      print(context.read<AccountsBloc>().state.accounts.length);
       context.read<AccountsBloc>().add(
             AccountEventCreated(Account(
               name: accountName,

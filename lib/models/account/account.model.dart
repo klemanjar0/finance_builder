@@ -8,7 +8,7 @@ Account _fromJson(JsonMap json) {
   String? id = json['id'];
   String? name = json['name'];
   String? description = json['description'];
-  bool? isNegativeAllowed = bool.tryParse(json['isNegativeAllowed']);
+  bool? isNegativeAllowed = json['isNegativeAllowed'] == 'true';
 
   return Account(
       id: id,
