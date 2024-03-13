@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
+import 'package:finance_builder/bloc/AppBlocObserver.dart';
+import 'package:finance_builder/main.dart';
 import 'package:finance_builder/models/account/account.api.dart';
 import 'package:finance_builder/models/account/account.repository.dart';
 import 'package:flutter/widgets.dart';
@@ -12,12 +14,12 @@ void bootstrap({required AccountApi accountApi}) {
     log(details.exceptionAsString(), stackTrace: details.stack);
   };
 
-  Bloc.observer = const AppBlocObserver();
+  Bloc.observer = AppBlocObserver();
 
   final accountRepository = AccountRepository(accountApi: accountApi);
 
   runZonedGuarded(
-    () => runApp(App(accountRepository: accountRepository)),
+    () => runApp(MyApp(accountRepository: accountRepository)),
     (error, stackTrace) => log(error.toString(), stackTrace: stackTrace),
   );
 }

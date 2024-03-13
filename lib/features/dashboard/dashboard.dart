@@ -2,17 +2,18 @@ import 'package:finance_builder/features/dashboard/pages/accounts.dart';
 import 'package:finance_builder/features/navigation/bottomNavBar.dart';
 import 'package:finance_builder/utils/utility.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 Widget getContentByTab(DashboardBottomTab tab) {
   switch (tab) {
     case DashboardBottomTab.home:
-      return Text(
+      return const Text(
         'Home',
       );
     case DashboardBottomTab.accounts:
       return AccountsPage();
     case DashboardBottomTab.settings:
-      return Text(
+      return const Text(
         'Settings',
       );
   }
@@ -35,10 +36,12 @@ class DashboardState extends State<Dashboard> {
     });
   }
 
-  Widget? renderFloatingActionButton() {
+  Widget? renderFloatingActionButton(BuildContext context) {
     if (_currentTab == DashboardBottomTab.accounts) {
       return FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () {
+          context.go('/createAccountScreen');
+        },
         backgroundColor: Colors.lightGreenAccent,
         foregroundColor: Colors.black,
         icon: const Icon(Icons.add),
@@ -58,7 +61,7 @@ class DashboardState extends State<Dashboard> {
       ),
       body: Center(child: getContentByTab(_currentTab)),
       bottomNavigationBar: BottomNavBar(onIndexChanged: onIndexChanged),
-      floatingActionButton: renderFloatingActionButton(),
+      floatingActionButton: renderFloatingActionButton(context),
     );
   }
 }

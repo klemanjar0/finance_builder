@@ -46,6 +46,7 @@ class AccountLocalStorage extends AccountApi {
 
   @override
   Future<void> createAccount(Account account) {
+    return Future.value();
     final accounts = [..._todoStreamController.value];
     accounts.add(account);
 
