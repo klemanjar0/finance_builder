@@ -47,10 +47,15 @@ class AccountsBloc extends Bloc<AccountEvent, AccountsState> {
     AccountEventDeleted event,
     Emitter<AccountsState> emit,
   ) async {
+    final lastDeleted = state.accounts
+        .firstWhere((it) => it.id == event.id, orElse: () => Account.empty);
+
     final newList =
         state.accounts.where((element) => element.id != event.id).toList();
 
-    emit(state.copyWith(accounts: () => newList));
+    emit(state.copyWith(
+        accounts: () => newList,
+        lastDeletedAccount: () => Account.copyWith(lastDeleted)));
     await _accountRepository.deleteAccount(event.id);
   }
 }

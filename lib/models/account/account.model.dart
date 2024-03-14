@@ -55,6 +55,15 @@ class Account extends Equatable {
     );
   }
 
+  factory Account.copyWith(Account account) {
+    return Account(
+      id: account.id,
+      name: account.name,
+      description: account.description,
+      isNegativeAllowed: account.isNegativeAllowed,
+    );
+  }
+
   static get empty {
     return Account();
   }
