@@ -6,65 +6,63 @@ import 'package:finance_builder/models/account/account.state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class AccountItem extends StatelessWidget {
   const AccountItem(
-      {super.key, required this.title, required this.isNegativeAllowed});
+      {super.key,
+      required this.id,
+      required this.title,
+      required this.isNegativeAllowed});
 
+  final String id;
   final String title;
   final bool isNegativeAllowed;
+
+  VoidCallback onOpenDetails(BuildContext context) {
+    return () {
+      context.goNamed('account', pathParameters: {'id': id});
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+        padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
         child: TouchableOpacity(
-          onTap: () {
-            print('Tap');
-          },
+          onTap: onOpenDetails(context),
           child: Container(
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(12),
-              ),
               child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding: EdgeInsets.symmetric(vertical: 2, horizontal: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Icon(Icons.account_balance),
-                              SizedBox(
-                                width: 8,
-                              ),
-                              Text(
-                                title,
-                                style: TextStyle(fontSize: 22),
-                              )
-                            ],
-                          ),
-                          Text("Balance: \$0.00")
+                          Flexible(
+                              child: Text(
+                            title,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 26, fontWeight: FontWeight.bold),
+                          )),
+                          const Text("\$0.00",
+                              style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w500))
                         ],
                       ),
                       Row(
                         children: [
                           if (!isNegativeAllowed)
-                            Icon(Icons.monetization_on_sharp,
-                                color: Colors.green),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          if (!isNegativeAllowed)
-                            Text(
+                            const Text(
                               'DEBIT ONLY',
                               style: TextStyle(
                                   inherit: true,
-                                  color: Colors.deepOrange,
+                                  color: Colors.black45,
                                   fontWeight: FontWeight.w700),
                             )
                         ],
@@ -95,19 +93,17 @@ class AccountsPageState extends State<AccountsPage> {
         child:
             BlocBuilder<AccountsBloc, AccountsState>(builder: (context, state) {
           return ListView.separated(
-            separatorBuilder: (context, index) => Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: 0.0,
-                horizontal: 24,
-              ),
+            separatorBuilder: (context, index) => const Padding(
+              padding: EdgeInsets.only(left: 24),
               child: Divider(
                 color: Colors.black12,
               ),
             ),
             itemCount: state.accounts.length,
             itemBuilder: (context, index) => Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
               child: AccountItem(
+                id: state.accounts[index].id,
                 title: state.accounts[index].name,
                 isNegativeAllowed: state.accounts[index].isNegativeAllowed,
               ),

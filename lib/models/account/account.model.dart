@@ -55,6 +55,10 @@ class Account extends Equatable {
     );
   }
 
+  static get empty {
+    return Account();
+  }
+
   static Account fromJson(JsonMap json) => _fromJson(json);
 
   JsonMap toJson() => _toJson(this);
