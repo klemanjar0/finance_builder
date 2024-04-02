@@ -47,7 +47,13 @@ class AccountDetailsScreenState extends State<AccountDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.id == null) {
-      return const Center(child: Text("Account ID is not provided"));
+      return Scaffold(
+        appBar: AppBar(
+            scrolledUnderElevation: 0.0,
+            backgroundColor: Colors.white24,
+            title: Text(_pageTitle)),
+        body: const Center(child: Text("Account ID is not provided.")),
+      );
     }
 
     return BlocProvider(

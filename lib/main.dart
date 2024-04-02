@@ -2,6 +2,7 @@ import 'package:finance_builder/bootstrap.dart';
 import 'package:finance_builder/features/navigation/router.dart';
 import 'package:finance_builder/models/account/account.localStorageApi.dart';
 import 'package:finance_builder/models/account/account.repository.dart';
+import 'package:finance_builder/theme/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepositoryProvider.value(
       value: accountRepository,
-      child: MaterialApp.router(routerConfig: router),
+      child: MaterialApp.router(routerConfig: router, theme: themeData),
     );
   }
 }
