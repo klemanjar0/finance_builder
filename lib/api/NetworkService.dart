@@ -34,15 +34,27 @@ final Map<Endpoint, EndpointConfig> _endpoints = {}
   ..addAll(_authEndpoints);
 
 class NetworkService {
+  static bool _isInstanceCreated = false;
+
   NetworkService() {
     var isValid = _init();
 
     if (!isValid) {
       throw Exception('NetworkService endpoint config broken');
     }
+
+    if (NetworkService._isInstanceCreated) {
+      throw Exception('NetworkService already declared');
+    }
+
+    NetworkService._isInstanceCreated = true;
   }
 
   Map<String, String> _defaultHeaders = {};
+
+  Map<String, String> get headers {
+    return _defaultHeaders;
+  }
 
   void setDefaultHeaders(Map<String, String> headers) {
     _defaultHeaders = headers;

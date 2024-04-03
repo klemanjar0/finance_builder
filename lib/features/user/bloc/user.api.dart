@@ -1,4 +1,6 @@
+import 'package:finance_builder/api/NetworkService.dart';
 import 'package:finance_builder/features/user/bloc/types.dart';
+import 'package:finance_builder/models/JsonMap.dart';
 
 abstract class UserApi {
   const UserApi();
@@ -8,28 +10,58 @@ abstract class UserApi {
     required String password,
   });
 
-  Future<SignInSuccess> register({
+  Future<SignInSuccess> signUp({
     required String username,
     required String password,
   });
+
+  void signOut();
 }
 
 class UserNetworkApi extends UserApi {
-  const UserNetworkApi();
+  UserNetworkApi({required NetworkService networkService})
+      : _networkService = networkService;
+
+  final NetworkService _networkService;
 
   @override
   Future<SignInSuccess> signIn({
     required String username,
     required String password,
-  }) {
-    return Future(() => const SignInSuccess(authToken: 'asd', username: 'asd'));
+  }) async {
+    JsonMap json = {"email": username, "password": password};
+    var response =
+        await _networkService.fetch(endpoint: Endpoint.signIn, data: json);
+    var payload = SignInSuccess.fromJson(response, username);
+    var token = payload.authToken;
+
+    _setAuthToken(token);
+
+    return payload;
   }
 
   @override
-  Future<SignInSuccess> register({
+  Future<SignInSuccess> signUp({
     required String username,
     required String password,
-  }) {
-    return Future(() => const SignInSuccess(authToken: 'asd', username: 'asd'));
+  }) async {
+    JsonMap json = {"email": username, "password": password};
+    var response =
+        await _networkService.fetch(endpoint: Endpoint.signUp, data: json);
+    var payload = SignInSuccess.fromJson(response, username);
+    var token = payload.authToken;
+
+    _setAuthToken(token);
+
+    return payload;
+  }
+
+  void _setAuthToken(String token) {
+    _networkService.addHeader(key: 'Authorization', value: 'Bearer $token');
+  }
+
+  @override
+  void signOut() {
+    _networkService.removeHeader(key: 'Authorization');
   }
 }

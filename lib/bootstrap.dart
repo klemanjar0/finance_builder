@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:finance_builder/features/user/bloc/user.api.dart';
+import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:finance_builder/bloc/AppBlocObserver.dart';
 import 'package:finance_builder/main.dart';
@@ -10,7 +12,8 @@ import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 
-void bootstrap({required AccountApi accountApi}) async {
+void bootstrap(
+    {required AccountApi accountApi, required UserApi userApi}) async {
   FlutterError.onError = (details) {
     log(details.exceptionAsString(), stackTrace: details.stack);
   };
@@ -25,9 +28,11 @@ void bootstrap({required AccountApi accountApi}) async {
   Bloc.observer = AppBlocObserver();
 
   final accountRepository = AccountRepository(accountApi: accountApi);
+  final userRepository = UserRepository(userApi: userApi);
 
   runZonedGuarded(
-    () => runApp(MyApp(accountRepository: accountRepository)),
+    () => runApp(MyApp(
+        accountRepository: accountRepository, userRepository: userRepository)),
     (error, stackTrace) => log(error.toString(), stackTrace: stackTrace),
   );
 }
