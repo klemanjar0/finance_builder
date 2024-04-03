@@ -15,6 +15,8 @@ abstract class UserApi {
     required String password,
   });
 
+  void setAuthToken(String token);
+
   void signOut();
 }
 
@@ -33,9 +35,6 @@ class UserNetworkApi extends UserApi {
     var response =
         await _networkService.fetch(endpoint: Endpoint.signIn, data: json);
     var payload = SignInSuccess.fromJson(response, username);
-    var token = payload.authToken;
-
-    _setAuthToken(token);
 
     return payload;
   }
@@ -49,14 +48,12 @@ class UserNetworkApi extends UserApi {
     var response =
         await _networkService.fetch(endpoint: Endpoint.signUp, data: json);
     var payload = SignInSuccess.fromJson(response, username);
-    var token = payload.authToken;
-
-    _setAuthToken(token);
 
     return payload;
   }
 
-  void _setAuthToken(String token) {
+  @override
+  void setAuthToken(String token) {
     _networkService.addHeader(key: 'Authorization', value: 'Bearer $token');
   }
 

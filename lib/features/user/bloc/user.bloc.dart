@@ -51,6 +51,12 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
   final UserRepository _userRepository;
 
   @override
+  Future<void> close() {
+    _userRepository.dispose();
+    return super.close();
+  }
+
+  @override
   UserState fromJson(Map<String, dynamic> json) {
     final String? authToken = json['authToken'];
     final String? username = json['username'];
