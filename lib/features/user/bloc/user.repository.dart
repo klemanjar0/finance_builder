@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:finance_builder/features/user/bloc/types.dart';
+import 'package:finance_builder/features/user/bloc/user.state.dart';
 
 import 'user.api.dart';
 
@@ -9,11 +10,12 @@ class UserRepository {
 
   final UserApi _userApi;
 
-  final _isLoggedInController = StreamController<bool>();
+  final _controller = StreamController<AuthenticationStatus>();
 
-  Stream<bool> get isLoggedIn async* {
+  Stream<AuthenticationStatus> get status async* {
     await Future<void>.delayed(const Duration(seconds: 1));
-    yield* _isLoggedInController.stream;
+    yield AuthenticationStatus.unauthenticated;
+    yield* _controller.stream;
   }
 
   Future<SignInSuccess> signIn({
@@ -22,7 +24,7 @@ class UserRepository {
   }) async {
     var result = await _userApi.signIn(username: username, password: password);
     _userApi.setAuthToken(result.authToken);
-    _isLoggedInController.add(true);
+    _controller.add(AuthenticationStatus.authenticated);
     return result;
   }
 
@@ -32,7 +34,7 @@ class UserRepository {
   }) async {
     var result = await _userApi.signUp(username: username, password: password);
     _userApi.setAuthToken(result.authToken);
-    _isLoggedInController.add(true);
+    _controller.add(AuthenticationStatus.authenticated);
     return result;
   }
 
@@ -40,9 +42,9 @@ class UserRepository {
     required String username,
     required String password,
   }) async {
-    _isLoggedInController.add(false);
+    _controller.add(AuthenticationStatus.unauthenticated);
     _userApi.signOut();
   }
 
-  void dispose() => _isLoggedInController.close();
+  void dispose() => _controller.close();
 }

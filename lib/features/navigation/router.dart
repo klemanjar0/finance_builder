@@ -1,12 +1,20 @@
 import 'package:finance_builder/features/account/accountDetailsScreen/account_details_screen.dart';
 import 'package:finance_builder/features/account/createAccountScreen/create_account_screen.dart';
 import 'package:finance_builder/features/dashboard/dashboard.dart';
+import 'package:finance_builder/features/splash/screens/SplashScreen.dart';
 import 'package:finance_builder/utils/constants.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
   debugLogDiagnostics: true,
+  initialLocation: '/splash',
   routes: [
+    GoRoute(
+      path: '/splash',
+      builder: (context, state) => const SplashScreen(
+        title: '',
+      ),
+    ),
     GoRoute(
         path: '/',
         builder: (context, state) => Dashboard(
