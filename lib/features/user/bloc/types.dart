@@ -10,11 +10,10 @@ class SignInSuccess extends Equatable {
   factory SignInSuccess.fromJson(JsonMap json, String? name) {
     return switch (json) {
       {
-        'username': String? username,
         'authToken': String authToken,
       } =>
         SignInSuccess(
-          username: name ?? username ?? '',
+          username: name ?? '',
           authToken: authToken,
         ),
       _ => throw const FormatException('Failed to load SignInSuccess.'),

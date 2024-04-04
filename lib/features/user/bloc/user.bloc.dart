@@ -58,9 +58,9 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
   UserBloc({required UserRepository userRepository})
       : _userRepository = userRepository,
         super(const UserState.unknown()) {
-    on<UserEventSignInRequested>((event, emit) => {});
-    on<UserEventStatusChanged>(_onUserEventStatusChanged);
-    on<UserEventSignInSubmitted>((event, emit) => {});
+    on<UserEventSignInRequested>(_onUserEventSignInRequested);
+    on<UserEventStatusChanged>(_UserEventStatusChanged);
+    on<UserEventSignInSubmitted>(_onUserEventSignInSubmitted);
     on<UserEventSignOutRequested>((event, emit) => {});
     on<UserEventCheckAuthRequested>(_onUserEventCheckAuthRequested);
     print('UserBloc');
@@ -73,12 +73,27 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
       _authenticationStatusSubscription;
   final UserRepository _userRepository;
 
-  void _onUserEventStatusChanged(
-          UserEventStatusChanged event, Emitter<UserState> emit) =>
-      {};
+  void _onUserEventSignInRequested(
+      UserEventSignInRequested event, Emitter<UserState> emit) async {
+    emit(state.copyWith(fetching: () => true));
+    var result = await _userRepository.signIn(
+        username: event.username, password: event.password);
+    add(UserEventSignInSubmitted(
+        authToken: result.authToken, username: result.username));
+  }
+
+  void _onUserEventSignInSubmitted(
+      UserEventSignInSubmitted event, Emitter<UserState> emit) {
+    emit(UserState.authenticated(
+        username: event.username, authToken: event.authToken));
+  }
+
+  void _UserEventStatusChanged(
+      UserEventStatusChanged event, Emitter<UserState> emit) {
+
+  }
 
   dynamic _onUserEventCheckAuthRequested(event, emit) {
-    print('_onUserEventCheckAuthRequested');
     var username = state.username;
     var authToken = state.authToken;
     var isLoggedIn = authToken != null && username != null;
@@ -89,12 +104,6 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     } else {
       return emit(const UserState.unauthenticated());
     }
-  }
-
-  @override
-  Future<void> close() {
-    _userRepository.dispose();
-    return super.close();
   }
 
   @override
