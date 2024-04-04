@@ -61,9 +61,8 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     on<UserEventSignInRequested>(_onUserEventSignInRequested);
     on<UserEventStatusChanged>(_UserEventStatusChanged);
     on<UserEventSignInSubmitted>(_onUserEventSignInSubmitted);
-    on<UserEventSignOutRequested>((event, emit) => {});
+    on<UserEventSignOutRequested>(_onUserEventSignOutRequested);
     on<UserEventCheckAuthRequested>(_onUserEventCheckAuthRequested);
-    print('UserBloc');
     _authenticationStatusSubscription = userRepository.status.listen(
       (status) => add(UserEventStatusChanged(status)),
     );
@@ -72,6 +71,11 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
   late StreamSubscription<AuthenticationStatus>
       _authenticationStatusSubscription;
   final UserRepository _userRepository;
+
+  void _onUserEventSignOutRequested(
+      UserEventSignOutRequested event, Emitter<UserState> emit) {
+    emit(const UserState.unauthenticated());
+  }
 
   void _onUserEventSignInRequested(
       UserEventSignInRequested event, Emitter<UserState> emit) async {
@@ -89,9 +93,7 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
   }
 
   void _UserEventStatusChanged(
-      UserEventStatusChanged event, Emitter<UserState> emit) {
-
-  }
+      UserEventStatusChanged event, Emitter<UserState> emit) {}
 
   dynamic _onUserEventCheckAuthRequested(event, emit) {
     var username = state.username;

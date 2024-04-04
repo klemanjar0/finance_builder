@@ -3,6 +3,7 @@ import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:finance_builder/features/user/bloc/user.state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class SignScreen extends StatefulWidget {
   const SignScreen({super.key});
@@ -24,7 +25,6 @@ class SignScreenState extends State<SignScreen> {
 
   VoidCallback _onSignInPressed(BuildContext context) {
     return () {
-      print('_onSignInPressed');
       final String email = emailController.value.text;
       final String password = emailController.value.text;
       context
@@ -99,6 +99,16 @@ class SignScreenState extends State<SignScreen> {
                             onPressed: _onSignInPressed(context),
                             child: const Text('do something, i want in!'));
                       }),
+                      BlocListener<UserBloc, UserState>(
+                        listener: (context, state) {
+                          if (state.status ==
+                              AuthenticationStatus.authenticated) {
+                            GoRouter.of(context)
+                                .pushReplacementNamed('dashboard');
+                          }
+                        },
+                        child: const SizedBox(),
+                      ),
                       BlocBuilder<UserBloc, UserState>(
                           builder: (context, state) {
                         if (state.fetching) {

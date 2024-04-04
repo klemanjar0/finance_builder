@@ -93,15 +93,17 @@ class NetworkService {
   Future<ApiResponse> _doRequest(
       {required Endpoint endpoint,
       Object? data,
-      Map<dynamic, dynamic>? options}) {
+      Map<dynamic, dynamic>? options}) async {
     var path = _buildRequestPath(endpoint);
     var endpointConfig = _endpoints[endpoint]!;
 
     switch (endpointConfig.type) {
       case RequestType.post:
         {
-          return http.post(Uri.parse(path),
+          var res = await http.post(Uri.parse(path),
               headers: _defaultHeaders, body: data);
+
+          return res;
         }
       case RequestType.get:
         {
