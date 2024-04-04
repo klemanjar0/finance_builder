@@ -24,6 +24,8 @@ Future<void> main() async {
   bootstrap(accountApi: accountsApi, userApi: userApi);
 }
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class MyApp extends StatelessWidget {
   final AccountRepository accountRepository;
   final UserRepository userRepository;

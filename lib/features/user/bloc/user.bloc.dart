@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:finance_builder/features/user/bloc/user.state.dart';
@@ -39,16 +41,55 @@ final class UserEventSignOutRequested extends UserEvent {
   List<Object> get props => [];
 }
 
+final class UserEventCheckAuthRequested extends UserEvent {
+  const UserEventCheckAuthRequested();
+
+  @override
+  List<Object> get props => [];
+}
+
+final class UserEventStatusChanged extends UserEvent {
+  const UserEventStatusChanged(this.status);
+
+  final AuthenticationStatus status;
+}
+
 class UserBloc extends HydratedBloc<UserEvent, UserState> {
   UserBloc({required UserRepository userRepository})
       : _userRepository = userRepository,
-        super(const UserState.unauthenticated()) {
+        super(const UserState.unknown()) {
     on<UserEventSignInRequested>((event, emit) => {});
+    on<UserEventStatusChanged>(_onUserEventStatusChanged);
     on<UserEventSignInSubmitted>((event, emit) => {});
     on<UserEventSignOutRequested>((event, emit) => {});
+    on<UserEventCheckAuthRequested>(_onUserEventCheckAuthRequested);
+    print('UserBloc');
+    _authenticationStatusSubscription = userRepository.status.listen(
+      (status) => add(UserEventStatusChanged(status)),
+    );
   }
 
+  late StreamSubscription<AuthenticationStatus>
+      _authenticationStatusSubscription;
   final UserRepository _userRepository;
+
+  void _onUserEventStatusChanged(
+          UserEventStatusChanged event, Emitter<UserState> emit) =>
+      {};
+
+  dynamic _onUserEventCheckAuthRequested(event, emit) {
+    print('_onUserEventCheckAuthRequested');
+    var username = state.username;
+    var authToken = state.authToken;
+    var isLoggedIn = authToken != null && username != null;
+
+    if (isLoggedIn) {
+      return emit(
+          UserState.authenticated(username: username, authToken: authToken));
+    } else {
+      return emit(const UserState.unauthenticated());
+    }
+  }
 
   @override
   Future<void> close() {
