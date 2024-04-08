@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:finance_builder/features/navigation/router.dart';
 import 'package:go_router/go_router.dart';
 
-const int LOGOUT_STATUS_CODE = 404;
+const int LOGOUT_STATUS_CODE = 401;
 
 final class AutoLogoutService {
   AutoLogoutService();
