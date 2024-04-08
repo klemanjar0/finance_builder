@@ -30,7 +30,7 @@ const Map<Endpoint, EndpointConfig> _authEndpoints = {
   Endpoint.signUp:
       EndpointConfig(path: '/auth/register', type: RequestType.post),
   Endpoint.signIn:
-      EndpointConfig(path: '/auth/sign_____in', type: RequestType.post)
+      EndpointConfig(path: '/auth/sign_in', type: RequestType.post)
 };
 
 final Map<Endpoint, EndpointConfig> _endpoints = {}
