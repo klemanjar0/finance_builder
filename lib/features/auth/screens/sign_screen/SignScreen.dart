@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../api/AutoLogoutService.dart';
+
 class SignScreen extends StatefulWidget {
   const SignScreen({super.key});
 
@@ -51,6 +53,7 @@ class SignScreenState extends State<SignScreen> {
     return BlocProvider(
         create: (_) => UserBloc(
               userRepository: context.read<UserRepository>(),
+              autoLogoutService: context.read<AutoLogoutService>(),
             ),
         child: Scaffold(
           appBar: AppBar(

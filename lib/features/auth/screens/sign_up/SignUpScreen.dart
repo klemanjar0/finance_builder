@@ -1,3 +1,4 @@
+import 'package:finance_builder/api/AutoLogoutService.dart';
 import 'package:finance_builder/features/user/bloc/user.bloc.dart';
 import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:finance_builder/features/user/bloc/user.state.dart';
@@ -47,6 +48,7 @@ class SignUpScreenState extends State<SignUpScreen> {
     return BlocProvider(
         create: (_) => UserBloc(
               userRepository: context.read<UserRepository>(),
+              autoLogoutService: context.read<AutoLogoutService>(),
             ),
         child: Scaffold(
           appBar: AppBar(

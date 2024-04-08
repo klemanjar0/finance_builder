@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:finance_builder/api/AutoLogoutService.dart';
 import 'package:finance_builder/features/user/bloc/user.api.dart';
 import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:flutter/foundation.dart';
@@ -13,7 +14,9 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 
 void bootstrap(
-    {required AccountApi accountApi, required UserApi userApi}) async {
+    {required AccountApi accountApi,
+    required UserApi userApi,
+    required AutoLogoutService autoLogoutService}) async {
   FlutterError.onError = (details) {
     log(details.exceptionAsString(), stackTrace: details.stack);
   };
@@ -32,7 +35,9 @@ void bootstrap(
 
   runZonedGuarded(
     () => runApp(MyApp(
-        accountRepository: accountRepository, userRepository: userRepository)),
+        accountRepository: accountRepository,
+        userRepository: userRepository,
+        autoLogoutService: autoLogoutService)),
     (error, stackTrace) => log(error.toString(), stackTrace: stackTrace),
   );
 }

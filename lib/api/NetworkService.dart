@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:finance_builder/models/JsonMap.dart';
 import 'package:http/http.dart' as http;
 
+import '../features/navigation/router.dart';
+import 'AutoLogoutService.dart';
+
 const String _apiPath =
     'https://finance-builder-api-005dc9562a36.herokuapp.com';
 
@@ -26,7 +29,8 @@ const Map<Endpoint, EndpointConfig> _generalEndpoints = {
 const Map<Endpoint, EndpointConfig> _authEndpoints = {
   Endpoint.signUp:
       EndpointConfig(path: '/auth/register', type: RequestType.post),
-  Endpoint.signIn: EndpointConfig(path: '/auth/sign_in', type: RequestType.post)
+  Endpoint.signIn:
+      EndpointConfig(path: '/auth/sign_____in', type: RequestType.post)
 };
 
 final Map<Endpoint, EndpointConfig> _endpoints = {}
@@ -54,7 +58,8 @@ class NetworkException implements Exception {
 class NetworkService {
   static bool _isInstanceCreated = false;
 
-  NetworkService() {
+  NetworkService({required AutoLogoutService autoLogoutService})
+      : _autoLogoutService = autoLogoutService {
     var isValid = _init();
 
     if (!isValid) {
@@ -67,6 +72,8 @@ class NetworkService {
 
     NetworkService._isInstanceCreated = true;
   }
+
+  final AutoLogoutService _autoLogoutService;
 
   Map<String, String> _defaultHeaders = {};
 
@@ -152,6 +159,8 @@ class NetworkService {
     var successCodes = [200, 201, 204];
     var response =
         await _doRequest(endpoint: endpoint, data: data, options: options);
+
+    _autoLogoutService.checkStatusCode(response.statusCode);
 
     if (!successCodes.contains(response.statusCode)) {
       throw NetworkException(

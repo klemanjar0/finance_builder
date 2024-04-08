@@ -1,3 +1,4 @@
+import 'package:finance_builder/api/AutoLogoutService.dart';
 import 'package:finance_builder/features/user/bloc/user.bloc.dart';
 import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:finance_builder/features/user/bloc/user.state.dart';
@@ -26,6 +27,7 @@ class SplashScreenState extends State<SplashScreen> {
     return BlocProvider(
         create: (_) => UserBloc(
               userRepository: context.read<UserRepository>(),
+              autoLogoutService: context.read<AutoLogoutService>(),
             )..add(const UserEventCheckAuthRequested()),
         child: BlocListener<UserBloc, UserState>(
           listener: (context, state) {

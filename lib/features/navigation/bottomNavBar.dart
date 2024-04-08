@@ -1,3 +1,4 @@
+import 'package:finance_builder/api/AutoLogoutService.dart';
 import 'package:finance_builder/features/user/bloc/user.bloc.dart';
 import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:finance_builder/features/user/bloc/user.state.dart';
@@ -40,6 +41,7 @@ class BottomNavBarState extends State<BottomNavBar> {
     return BlocProvider(
         create: (_) => UserBloc(
               userRepository: context.read<UserRepository>(),
+              autoLogoutService: context.read<AutoLogoutService>(),
             ),
         child: BlocBuilder<UserBloc, UserState>(builder: (context, state) {
           return BottomNavigationBar(

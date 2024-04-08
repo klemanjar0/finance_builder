@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
+import 'package:finance_builder/api/AutoLogoutService.dart';
 import 'package:finance_builder/api/NetworkService.dart';
 import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:finance_builder/features/user/bloc/user.state.dart';
@@ -102,8 +103,11 @@ final class UserEventInvokeBuild extends UserEvent {
 }
 
 class UserBloc extends HydratedBloc<UserEvent, UserState> {
-  UserBloc({required UserRepository userRepository})
+  UserBloc(
+      {required UserRepository userRepository,
+      required AutoLogoutService autoLogoutService})
       : _userRepository = userRepository,
+        _autoLogoutService = autoLogoutService,
         super(UserState.unknown()) {
     on<UserEventSignInRequested>(_onUserEventSignInRequested);
     on<UserEventStatusChanged>(_UserEventStatusChanged);
@@ -119,11 +123,19 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     on<UserEventInvokeBuild>((event, emit) {
       emit(state.updateSync());
     });
+
+    _autoLogoutService.shouldLogout.listen((event) {
+      if (event) {
+        add(const UserEventSignOutRequested());
+        _autoLogoutService.reset();
+      }
+    });
   }
 
   late StreamSubscription<AuthenticationStatus>
       _authenticationStatusSubscription;
   final UserRepository _userRepository;
+  final AutoLogoutService _autoLogoutService;
 
   void _onUserEventResetError(
       UserEventResetError event, Emitter<UserState> emit) {
