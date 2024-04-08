@@ -28,9 +28,8 @@ class SplashScreenState extends State<SplashScreen> {
               userRepository: context.read<UserRepository>(),
             )..add(const UserEventCheckAuthRequested()),
         child: BlocListener<UserBloc, UserState>(
-          listener: (context, state) async {
-            await Future<void>.delayed(const Duration(seconds: 2))
-                .then((value) {
+          listener: (context, state) {
+            Future<void>.delayed(const Duration(seconds: 2)).then((_) {
               switch (state.status) {
                 case AuthenticationStatus.authenticated:
                   GoRouter.of(context).pushReplacementNamed('dashboard');

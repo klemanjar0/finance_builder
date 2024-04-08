@@ -57,7 +57,7 @@ class DashboardState extends State<Dashboard> {
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
-        backgroundColor: Colors.white24,
+        backgroundColor: Theme.of(context).colorScheme.background,
         title: Text(widget.title),
       ),
       body: Center(child: getContentByTab(_currentTab)),

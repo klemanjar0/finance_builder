@@ -15,8 +15,6 @@ class SignScreen extends StatefulWidget {
 
 class SignScreenState extends State<SignScreen> {
   bool _passwordVisible = false;
-  bool _canProceedWithEmail = false;
-  bool _canProceedWithPassword = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -44,18 +42,6 @@ class SignScreenState extends State<SignScreen> {
   @override
   void initState() {
     _passwordVisible = false;
-
-    _emailController.addListener(() {
-      setState(() {
-        _canProceedWithEmail = _emailController.value.text.isNotEmpty;
-      });
-    });
-
-    _passwordController.addListener(() {
-      setState(() {
-        _canProceedWithPassword = _passwordController.value.text.isNotEmpty;
-      });
-    });
 
     super.initState();
   }
@@ -114,9 +100,7 @@ class SignScreenState extends State<SignScreen> {
                       BlocBuilder<UserBloc, UserState>(
                           builder: (context, state) {
                         return FilledButton.icon(
-                            onPressed: state.fetching ||
-                                    !_canProceedWithEmail ||
-                                    !_canProceedWithPassword
+                            onPressed: state.fetching
                                 ? null
                                 : _onSignInPressed(context),
                             icon: state.fetching

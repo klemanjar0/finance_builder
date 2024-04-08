@@ -43,30 +43,34 @@ class BottomNavBarState extends State<BottomNavBar> {
             ),
         child: BlocBuilder<UserBloc, UserState>(builder: (context, state) {
           return BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: Icon(Icons.home),
+                icon: const Icon(Icons.home_outlined),
+                activeIcon: const Icon(Icons.home),
                 label: 'Dashboard',
-                backgroundColor: Colors.grey,
+                backgroundColor: Theme.of(context).colorScheme.background,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.account_balance_wallet),
+                icon: const Icon(Icons.account_balance_wallet_outlined),
+                activeIcon: const Icon(Icons.account_balance_wallet),
                 label: 'Accounts',
-                backgroundColor: Colors.grey,
+                backgroundColor: Theme.of(context).colorScheme.background,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
+                icon: const Icon(Icons.settings_outlined),
+                activeIcon: const Icon(Icons.settings),
                 label: 'Settings',
-                backgroundColor: Colors.grey,
+                backgroundColor: Theme.of(context).colorScheme.background,
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.logout),
                 label: 'Log Out',
-                backgroundColor: Colors.grey,
+                backgroundColor: Theme.of(context).colorScheme.background,
               ),
             ],
             currentIndex: _selectedIndex,
-            selectedItemColor: Colors.black,
+            selectedItemColor: Theme.of(context).colorScheme.primary,
+            unselectedItemColor: Theme.of(context).colorScheme.inversePrimary,
             onTap: _onItemTapped(context),
           );
         }));

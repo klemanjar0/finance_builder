@@ -43,5 +43,10 @@ class UserRepository {
     _userApi.signOut();
   }
 
+  void fromPersist(String authToken) {
+    _userApi.setAuthToken(authToken);
+    _controller.add(AuthenticationStatus.authenticated);
+  }
+
   void dispose() => _controller.close();
 }

@@ -94,6 +94,13 @@ final class UserEventStatusChanged extends UserEvent {
   List<Object> get props => [status];
 }
 
+final class UserEventInvokeBuild extends UserEvent {
+  const UserEventInvokeBuild();
+
+  @override
+  List<Object> get props => [];
+}
+
 class UserBloc extends HydratedBloc<UserEvent, UserState> {
   UserBloc({required UserRepository userRepository})
       : _userRepository = userRepository,
@@ -108,6 +115,9 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     on<UserEventResetError>(_onUserEventResetError);
     on<UserEventSetFetching>((event, emit) {
       emit(state.copyWith(fetching: () => event.flag));
+    });
+    on<UserEventInvokeBuild>((event, emit) {
+      emit(state.updateSync());
     });
   }
 
@@ -151,6 +161,7 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     add(const UserEventResetError());
     add(const UserEventSetFetching(flag: true));
     try {
+      print('_onUserEventSignInRequested');
       var result = await _userRepository.signIn(
           username: event.username, password: event.password);
 
@@ -174,16 +185,16 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     emit(state.copyWith(status: () => event.status));
   }
 
-  dynamic _onUserEventCheckAuthRequested(event, emit) {
+  void _onUserEventCheckAuthRequested(event, emit) {
+    emit(state.updateSync());
     var username = state.user.username;
     var authToken = state.user.authToken;
     var isLoggedIn = authToken != null && username != null;
-
     if (isLoggedIn) {
-      return emit(UserState.authenticated(
+      emit(UserState.authenticated(
           user: User(authToken: event.authToken, username: event.username)));
     } else {
-      return emit(UserState.unauthenticated());
+      emit(UserState.unauthenticated());
     }
   }
 
@@ -191,10 +202,11 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
   UserState fromJson(Map<String, dynamic> json) {
     final String? authToken = json['authToken'];
     final String? username = json['username'];
-
     if (authToken == null || username == null) {
       return UserState.unauthenticated();
     }
+
+    _userRepository.fromPersist(authToken);
 
     return UserState.authenticated(
         user: User(authToken: authToken, username: username));

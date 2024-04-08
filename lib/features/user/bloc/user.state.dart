@@ -20,36 +20,52 @@ class UserState extends Equatable {
       {required this.user,
       required this.status,
       this.fetching = false,
-      this.message});
+      this.message,
+      this.sync = 0});
 
   const UserState.authenticated({required User user})
       : this._(user: user, status: AuthenticationStatus.authenticated);
   UserState.unauthenticated()
       : this._(
-            user: User.empty(), status: AuthenticationStatus.unauthenticated);
+            user: User.empty(),
+            sync: 0,
+            status: AuthenticationStatus.unauthenticated);
   UserState.unknown()
       : this._(
             user: User.empty(),
             status: AuthenticationStatus.unknown,
+            sync: 0,
             fetching: false);
 
   final AuthenticationStatus status;
   final User user;
   final String? message;
   final bool fetching;
+  final int sync;
 
   UserState copyWith({
     User Function()? user,
     AuthenticationStatus Function()? status,
     bool Function()? fetching,
     String? Function()? message,
+    int Function()? sync,
   }) {
     return UserState._(
       user: user != null ? user() : this.user,
       status: status != null ? status() : this.status,
       fetching: fetching != null ? fetching() : this.fetching,
       message: message != null ? message() : this.message,
+      sync: sync != null ? sync() : this.sync,
     );
+  }
+
+  UserState updateSync() {
+    return UserState._(
+        user: user,
+        status: status,
+        fetching: fetching,
+        message: message,
+        sync: sync + 1);
   }
 
   UserState loading({
@@ -60,9 +76,10 @@ class UserState extends Equatable {
       status: this.status,
       fetching: fetching,
       message: this.message,
+      sync: sync,
     );
   }
 
   @override
-  List<Object?> get props => [user, status, fetching, message];
+  List<Object?> get props => [user, status, fetching, message, sync];
 }
