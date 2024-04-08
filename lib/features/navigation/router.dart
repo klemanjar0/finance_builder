@@ -7,6 +7,8 @@ import 'package:finance_builder/main.dart';
 import 'package:finance_builder/utils/constants.dart';
 import 'package:go_router/go_router.dart';
 
+import '../auth/screens/sign_up/SignUpScreen.dart';
+
 final router = GoRouter(
   navigatorKey: navigatorKey,
   debugLogDiagnostics: true,
@@ -21,6 +23,10 @@ final router = GoRouter(
     ),
     GoRoute(
         path: '/sign', name: 'sign', builder: (context, state) => SignScreen()),
+    GoRoute(
+        path: '/sign_up',
+        name: 'sign_up',
+        builder: (context, state) => SignUpScreen()),
     GoRoute(
         path: '/',
         name: 'dashboard',

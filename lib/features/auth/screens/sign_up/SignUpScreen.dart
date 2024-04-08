@@ -6,17 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-class SignScreen extends StatefulWidget {
-  const SignScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  SignScreenState createState() => SignScreenState();
+  SignUpScreenState createState() => SignUpScreenState();
 }
 
-class SignScreenState extends State<SignScreen> {
+class SignUpScreenState extends State<SignUpScreen> {
   bool _passwordVisible = false;
-  bool _canProceedWithEmail = false;
-  bool _canProceedWithPassword = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -33,29 +31,13 @@ class SignScreenState extends State<SignScreen> {
 
       context
           .read<UserBloc>()
-          .add(UserEventSignInRequested(username: email, password: password));
+          .add(UserEventSignUpRequested(username: email, password: password));
     };
-  }
-
-  void _onSignUpPressed(BuildContext context) {
-    GoRouter.of(context).pushNamed('sign_up');
   }
 
   @override
   void initState() {
     _passwordVisible = false;
-
-    _emailController.addListener(() {
-      setState(() {
-        _canProceedWithEmail = _emailController.value.text.isNotEmpty;
-      });
-    });
-
-    _passwordController.addListener(() {
-      setState(() {
-        _canProceedWithPassword = _passwordController.value.text.isNotEmpty;
-      });
-    });
 
     super.initState();
   }
@@ -68,7 +50,7 @@ class SignScreenState extends State<SignScreen> {
             ),
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Sign In'),
+            title: const Text('Create Account'),
           ),
           body: Container(
             width: double.infinity,
@@ -87,7 +69,7 @@ class SignScreenState extends State<SignScreen> {
                           prefixIcon: const Icon(Icons.email_outlined),
                           labelText: 'email',
                           labelStyle: Theme.of(context).textTheme.bodyMedium,
-                          hintText: 'enter your email, honey',
+                          hintText: 'enter your email, sweetie',
                         ),
                       ),
                       TextFormField(
@@ -98,7 +80,7 @@ class SignScreenState extends State<SignScreen> {
                             prefixIcon: const Icon(Icons.password_outlined),
                             labelText: 'password',
                             labelStyle: Theme.of(context).textTheme.bodyMedium,
-                            hintText: 'and your password, sweetie',
+                            hintText: 'and create a password, booty',
                             suffixIcon: IconButton(
                               icon: Icon(
                                 // Based on passwordVisible state choose the icon
@@ -114,9 +96,7 @@ class SignScreenState extends State<SignScreen> {
                       BlocBuilder<UserBloc, UserState>(
                           builder: (context, state) {
                         return FilledButton.icon(
-                            onPressed: state.fetching ||
-                                    !_canProceedWithEmail ||
-                                    !_canProceedWithPassword
+                            onPressed: state.fetching
                                 ? null
                                 : _onSignInPressed(context),
                             icon: state.fetching
@@ -130,7 +110,7 @@ class SignScreenState extends State<SignScreen> {
                                     ),
                                   )
                                 : const Icon(Icons.login_outlined),
-                            label: const Text('do something, i want in!'));
+                            label: const Text('let\'s do it!'));
                       }),
                       BlocListener<UserBloc, UserState>(
                         listener: (context, state) {
@@ -151,27 +131,6 @@ class SignScreenState extends State<SignScreen> {
                           style: Theme.of(context).textTheme.bodyMedium?.apply(
                               color: Theme.of(context).colorScheme.error),
                         );
-                      }),
-                      const SizedBox(
-                        height: 32,
-                      ),
-                      Text(
-                        'we do not share anyone\'s data. we promise. \nmaybe only the way you\'re so cute. and nothing else.',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.apply(color: Theme.of(context).primaryColorLight),
-                      ),
-                      const SizedBox(
-                        height: 32,
-                      ),
-                      BlocBuilder<UserBloc, UserState>(
-                          builder: (context, state) {
-                        return ElevatedButton(
-                            onPressed: () => _onSignUpPressed(context),
-                            child: const Text(
-                                'i don\'t have an account :c lemme create one'));
                       }),
                     ],
                   )),

@@ -24,6 +24,17 @@ final class UserEventSignInRequested extends UserEvent {
   List<Object> get props => [username, password];
 }
 
+final class UserEventSignUpRequested extends UserEvent {
+  const UserEventSignUpRequested(
+      {required this.username, required this.password});
+
+  final String username;
+  final String password;
+
+  @override
+  List<Object> get props => [username, password];
+}
+
 final class UserEventSignInSubmitted extends UserEvent {
   const UserEventSignInSubmitted(
       {required this.username, required this.authToken});
@@ -90,6 +101,7 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     on<UserEventSignOutRequested>(_onUserEventSignOutRequested);
     on<UserEventCheckAuthRequested>(_onUserEventCheckAuthRequested);
     on<UserEventSignInSubmittedFailed>(_onUserEventSignInSubmittedFailed);
+    on<UserEventSignUpRequested>(_onUserEventSignUpRequested);
     on<UserEventResetError>(_onUserEventResetError);
     on<UserEventSetFetching>((event, emit) {
       emit(state.copyWith(fetching: () => event.flag));
@@ -108,6 +120,22 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
   void _onUserEventSignOutRequested(
       UserEventSignOutRequested event, Emitter<UserState> emit) {
     emit(UserState.unauthenticated());
+  }
+
+  void _onUserEventSignUpRequested(
+      UserEventSignUpRequested event, Emitter<UserState> emit) async {
+    add(const UserEventSetFetching(flag: true));
+    try {
+      var result = await _userRepository.signUp(
+          username: event.username, password: event.password);
+
+      add(UserEventSignInSubmitted(
+          authToken: result.authToken, username: result.username));
+    } on NetworkException catch (e) {
+      add(UserEventSignInSubmittedFailed(message: e.toString()));
+    } finally {
+      add(const UserEventSetFetching(flag: false));
+    }
   }
 
   void _onUserEventSignInSubmittedFailed(
