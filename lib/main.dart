@@ -8,6 +8,7 @@ import 'package:finance_builder/models/account/account.repository.dart';
 import 'package:finance_builder/theme/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {

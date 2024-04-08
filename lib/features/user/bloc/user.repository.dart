@@ -38,10 +38,7 @@ class UserRepository {
     return result;
   }
 
-  void signOut({
-    required String username,
-    required String password,
-  }) async {
+  void signOut() async {
     _controller.add(AuthenticationStatus.unauthenticated);
     _userApi.signOut();
   }

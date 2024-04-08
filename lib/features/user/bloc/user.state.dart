@@ -2,50 +2,67 @@ import 'package:equatable/equatable.dart';
 
 enum AuthenticationStatus { unknown, authenticated, unauthenticated }
 
-final class UserState extends Equatable {
-  const UserState._(
-      {this.authToken,
-      this.username,
-      required this.status,
-      this.fetching = false});
+class User {
+  User({required this.username, required this.authToken});
 
-  const UserState.authenticated(
-      {required String username, required String authToken})
+  User.empty() : this(authToken: null, username: null);
+
+  final String? username;
+  final String? authToken;
+
+  bool isAuthed() {
+    return authToken != null;
+  }
+}
+
+class UserState extends Equatable {
+  const UserState._(
+      {required this.user,
+      required this.status,
+      this.fetching = false,
+      this.message});
+
+  const UserState.authenticated({required User user})
+      : this._(user: user, status: AuthenticationStatus.authenticated);
+  UserState.unauthenticated()
       : this._(
-            authToken: authToken,
-            username: username,
-            status: AuthenticationStatus.authenticated,
+            user: User.empty(), status: AuthenticationStatus.unauthenticated);
+  UserState.unknown()
+      : this._(
+            user: User.empty(),
+            status: AuthenticationStatus.unknown,
             fetching: false);
-  const UserState.unauthenticated()
-      : this._(
-            authToken: null,
-            username: null,
-            status: AuthenticationStatus.unauthenticated);
-  const UserState.unknown()
-      : this._(
-            authToken: null,
-            username: null,
-            status: AuthenticationStatus.unknown);
 
   final AuthenticationStatus status;
-  final String? authToken;
-  final String? username;
+  final User user;
+  final String? message;
   final bool fetching;
 
   UserState copyWith({
-    String Function()? authToken,
-    String Function()? username,
+    User Function()? user,
     AuthenticationStatus Function()? status,
     bool Function()? fetching,
+    String? Function()? message,
   }) {
     return UserState._(
-      authToken: authToken != null ? authToken() : this.authToken,
-      username: username != null ? username() : this.username,
+      user: user != null ? user() : this.user,
       status: status != null ? status() : this.status,
       fetching: fetching != null ? fetching() : this.fetching,
+      message: message != null ? message() : this.message,
+    );
+  }
+
+  UserState loading({
+    required bool fetching,
+  }) {
+    return UserState._(
+      user: this.user,
+      status: this.status,
+      fetching: fetching,
+      message: this.message,
     );
   }
 
   @override
-  List<Object?> get props => [authToken, username];
+  List<Object?> get props => [user, status, fetching, message];
 }

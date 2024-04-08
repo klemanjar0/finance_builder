@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+extension TextColors on ThemeData {
+  MaterialAccentColor get errorColor {
+    return Colors.redAccent;
+  }
+}
+
 final ThemeData themeData = ThemeData(
   useMaterial3: true,
   colorScheme: ColorScheme.fromSeed(

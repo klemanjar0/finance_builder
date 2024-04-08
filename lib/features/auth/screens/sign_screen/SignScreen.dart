@@ -1,6 +1,7 @@
 import 'package:finance_builder/features/user/bloc/user.bloc.dart';
 import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:finance_builder/features/user/bloc/user.state.dart';
+import 'package:finance_builder/theme/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -14,8 +15,8 @@ class SignScreen extends StatefulWidget {
 
 class SignScreenState extends State<SignScreen> {
   bool _passwordVisible = false;
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   void _togglePasswordVisible() {
     setState(() {
@@ -25,8 +26,9 @@ class SignScreenState extends State<SignScreen> {
 
   VoidCallback _onSignInPressed(BuildContext context) {
     return () {
-      final String email = emailController.value.text;
-      final String password = emailController.value.text;
+      String email = _emailController.value.text;
+      String password = _passwordController.value.text;
+
       context
           .read<UserBloc>()
           .add(UserEventSignInRequested(username: email, password: password));
@@ -64,7 +66,7 @@ class SignScreenState extends State<SignScreen> {
                     children: [
                       TextFormField(
                         style: Theme.of(context).textTheme.bodyMedium,
-                        controller: emailController,
+                        controller: _emailController,
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.email_outlined),
                           labelText: 'email',
@@ -74,7 +76,7 @@ class SignScreenState extends State<SignScreen> {
                       ),
                       TextFormField(
                           style: Theme.of(context).textTheme.bodyMedium,
-                          controller: passwordController,
+                          controller: _passwordController,
                           obscureText: !_passwordVisible,
                           decoration: InputDecoration(
                             prefixIcon: const Icon(Icons.password_outlined),
@@ -95,9 +97,22 @@ class SignScreenState extends State<SignScreen> {
                       const SizedBox(height: 16),
                       BlocBuilder<UserBloc, UserState>(
                           builder: (context, state) {
-                        return FilledButton(
-                            onPressed: _onSignInPressed(context),
-                            child: const Text('do something, i want in!'));
+                        return FilledButton.icon(
+                            onPressed: state.fetching
+                                ? null
+                                : _onSignInPressed(context),
+                            icon: state.fetching
+                                ? Container(
+                                    width: 24,
+                                    height: 24,
+                                    padding: const EdgeInsets.all(2.0),
+                                    child: const CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 3,
+                                    ),
+                                  )
+                                : const Icon(Icons.login_outlined),
+                            label: const Text('do something, i want in!'));
                       }),
                       BlocListener<UserBloc, UserState>(
                         listener: (context, state) {
@@ -109,19 +124,19 @@ class SignScreenState extends State<SignScreen> {
                         },
                         child: const SizedBox(),
                       ),
+                      const SizedBox(height: 32),
                       BlocBuilder<UserBloc, UserState>(
                           builder: (context, state) {
-                        if (state.fetching) {
-                          return const Padding(
-                              padding: EdgeInsets.all(8),
-                              child: CircularProgressIndicator());
-                        }
-
-                        return const SizedBox(
-                          height: 0,
+                        return Text(
+                          state.message ?? '',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium?.apply(
+                              color: Theme.of(context).colorScheme.error),
                         );
                       }),
-                      const SizedBox(height: 32),
+                      const SizedBox(
+                        height: 32,
+                      ),
                       Text(
                         'we do not share anyone\'s data. we promise. \nmaybe only the way you\'re so cute. and nothing else.',
                         textAlign: TextAlign.center,
@@ -133,10 +148,13 @@ class SignScreenState extends State<SignScreen> {
                       const SizedBox(
                         height: 32,
                       ),
-                      ElevatedButton(
-                          onPressed: () {},
-                          child: const Text(
-                              'i don\'t have an account :c lemme create one'))
+                      BlocBuilder<UserBloc, UserState>(
+                          builder: (context, state) {
+                        return ElevatedButton(
+                            onPressed: null,
+                            child: const Text(
+                                'i don\'t have an account :c lemme create one'));
+                      }),
                     ],
                   )),
             ),

@@ -33,6 +33,24 @@ final Map<Endpoint, EndpointConfig> _endpoints = {}
   ..addAll(_generalEndpoints)
   ..addAll(_authEndpoints);
 
+class NetworkException implements Exception {
+  final String _message;
+  final int _statusCode;
+
+  NetworkException(message, statusCode)
+      : _statusCode = statusCode,
+        _message = message;
+
+  @override
+  String toString() {
+    return _message;
+  }
+
+  int getStatusCode() {
+    return _statusCode;
+  }
+}
+
 class NetworkService {
   static bool _isInstanceCreated = false;
 
@@ -100,24 +118,29 @@ class NetworkService {
     switch (endpointConfig.type) {
       case RequestType.post:
         {
-          var res = await http.post(Uri.parse(path),
-              headers: _defaultHeaders, body: data);
+          var res = await http
+              .post(Uri.parse(path), headers: _defaultHeaders, body: data)
+              .timeout(const Duration(seconds: 5));
 
           return res;
         }
       case RequestType.get:
         {
-          return http.get(Uri.parse(path), headers: _defaultHeaders);
+          return http
+              .get(Uri.parse(path), headers: _defaultHeaders)
+              .timeout(const Duration(seconds: 5));
         }
       case RequestType.put:
         {
-          return http.put(Uri.parse(path),
-              headers: _defaultHeaders, body: data);
+          return http
+              .put(Uri.parse(path), headers: _defaultHeaders, body: data)
+              .timeout(const Duration(seconds: 5));
         }
       case RequestType.delete:
         {
-          return http.delete(Uri.parse(path),
-              headers: _defaultHeaders, body: data);
+          return http
+              .delete(Uri.parse(path), headers: _defaultHeaders, body: data)
+              .timeout(const Duration(seconds: 5));
         }
     }
   }
@@ -126,8 +149,15 @@ class NetworkService {
       {required Endpoint endpoint,
       Object? data,
       Map<dynamic, dynamic>? options}) async {
+    var successCodes = [200, 201, 204];
     var response =
         await _doRequest(endpoint: endpoint, data: data, options: options);
+
+    if (!successCodes.contains(response.statusCode)) {
+      throw NetworkException(
+          jsonDecode(response.body)['message'] ?? 'Unknown error',
+          response.statusCode);
+    }
 
     return jsonDecode(response.body) as JsonMap;
   }

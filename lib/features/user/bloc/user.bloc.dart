@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
+import 'package:finance_builder/api/NetworkService.dart';
 import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:finance_builder/features/user/bloc/user.state.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -34,6 +35,31 @@ final class UserEventSignInSubmitted extends UserEvent {
   List<Object> get props => [username, authToken];
 }
 
+final class UserEventSignInSubmittedFailed extends UserEvent {
+  const UserEventSignInSubmittedFailed({required this.message});
+
+  final String message;
+
+  @override
+  List<Object> get props => [message];
+}
+
+final class UserEventSetFetching extends UserEvent {
+  const UserEventSetFetching({required this.flag});
+
+  final bool flag;
+
+  @override
+  List<Object> get props => [flag];
+}
+
+final class UserEventResetError extends UserEvent {
+  const UserEventResetError();
+
+  @override
+  List<Object> get props => [];
+}
+
 final class UserEventSignOutRequested extends UserEvent {
   const UserEventSignOutRequested();
 
@@ -57,54 +83,76 @@ final class UserEventStatusChanged extends UserEvent {
 class UserBloc extends HydratedBloc<UserEvent, UserState> {
   UserBloc({required UserRepository userRepository})
       : _userRepository = userRepository,
-        super(const UserState.unknown()) {
+        super(UserState.unknown()) {
     on<UserEventSignInRequested>(_onUserEventSignInRequested);
     on<UserEventStatusChanged>(_UserEventStatusChanged);
     on<UserEventSignInSubmitted>(_onUserEventSignInSubmitted);
     on<UserEventSignOutRequested>(_onUserEventSignOutRequested);
     on<UserEventCheckAuthRequested>(_onUserEventCheckAuthRequested);
-    _authenticationStatusSubscription = userRepository.status.listen(
-      (status) => add(UserEventStatusChanged(status)),
-    );
+    on<UserEventSignInSubmittedFailed>(_onUserEventSignInSubmittedFailed);
+    on<UserEventResetError>(_onUserEventResetError);
+    on<UserEventSetFetching>((event, emit) {
+      emit(state.copyWith(fetching: () => event.flag));
+    });
   }
 
   late StreamSubscription<AuthenticationStatus>
       _authenticationStatusSubscription;
   final UserRepository _userRepository;
 
+  void _onUserEventResetError(
+      UserEventResetError event, Emitter<UserState> emit) {
+    emit(state.copyWith(message: () => null));
+  }
+
   void _onUserEventSignOutRequested(
       UserEventSignOutRequested event, Emitter<UserState> emit) {
-    emit(const UserState.unauthenticated());
+    emit(UserState.unauthenticated());
+  }
+
+  void _onUserEventSignInSubmittedFailed(
+      UserEventSignInSubmittedFailed event, Emitter<UserState> emit) async {
+    emit(state.copyWith(message: () => event.message));
   }
 
   void _onUserEventSignInRequested(
       UserEventSignInRequested event, Emitter<UserState> emit) async {
-    emit(state.copyWith(fetching: () => true));
-    var result = await _userRepository.signIn(
-        username: event.username, password: event.password);
-    add(UserEventSignInSubmitted(
-        authToken: result.authToken, username: result.username));
+    add(const UserEventResetError());
+    add(const UserEventSetFetching(flag: true));
+    try {
+      var result = await _userRepository.signIn(
+          username: event.username, password: event.password);
+
+      add(UserEventSignInSubmitted(
+          authToken: result.authToken, username: result.username));
+    } on NetworkException catch (e) {
+      add(UserEventSignInSubmittedFailed(message: e.toString()));
+    } finally {
+      add(const UserEventSetFetching(flag: false));
+    }
   }
 
   void _onUserEventSignInSubmitted(
       UserEventSignInSubmitted event, Emitter<UserState> emit) {
     emit(UserState.authenticated(
-        username: event.username, authToken: event.authToken));
+        user: User(authToken: event.authToken, username: event.username)));
   }
 
   void _UserEventStatusChanged(
-      UserEventStatusChanged event, Emitter<UserState> emit) {}
+      UserEventStatusChanged event, Emitter<UserState> emit) {
+    emit(state.copyWith(status: () => event.status));
+  }
 
   dynamic _onUserEventCheckAuthRequested(event, emit) {
-    var username = state.username;
-    var authToken = state.authToken;
+    var username = state.user.username;
+    var authToken = state.user.authToken;
     var isLoggedIn = authToken != null && username != null;
 
     if (isLoggedIn) {
-      return emit(
-          UserState.authenticated(username: username, authToken: authToken));
+      return emit(UserState.authenticated(
+          user: User(authToken: event.authToken, username: event.username)));
     } else {
-      return emit(const UserState.unauthenticated());
+      return emit(UserState.unauthenticated());
     }
   }
 
@@ -114,13 +162,14 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     final String? username = json['username'];
 
     if (authToken == null || username == null) {
-      return const UserState.unauthenticated();
+      return UserState.unauthenticated();
     }
 
-    return UserState.authenticated(username: username, authToken: authToken);
+    return UserState.authenticated(
+        user: User(authToken: authToken, username: username));
   }
 
   @override
   Map<String, String?> toJson(UserState state) =>
-      {'authToken': state.authToken, 'username': state.username};
+      {'authToken': state.user.authToken, 'username': state.user.username};
 }
