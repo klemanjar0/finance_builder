@@ -89,6 +89,9 @@ final class UserEventStatusChanged extends UserEvent {
   const UserEventStatusChanged(this.status);
 
   final AuthenticationStatus status;
+
+  @override
+  List<Object> get props => [status];
 }
 
 class UserBloc extends HydratedBloc<UserEvent, UserState> {
