@@ -14,6 +14,8 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
     on<AccountEventGetListRequested>(_onAccountEventGetListRequested);
     on<AccountEventGetListReceived>(_onAccountEventGetListReceived);
     on<AccountEventGetListFailure>(_onAccountEventGetListFailure);
+    on<AccountEventCreateRequested>(_onAccountEventCreateRequested);
+    on<AccountEventCreateFailure>(_onAccountEventCreateFailure);
   }
 
   final AccountsRepository _accountsRepository;
@@ -22,6 +24,26 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
   void _onAccountEventResetState(
       AccountEventResetState event, Emitter<AccountState> emit) {
     emit(AccountState.empty());
+  }
+
+  void _onAccountEventCreateFailure(
+      AccountEventCreateFailure event, Emitter<AccountState> emit) {
+    emit(AccountState.failure(event.message));
+  }
+
+  void _onAccountEventCreateRequested(
+      AccountEventCreateRequested event, Emitter<AccountState> emit) async {
+    emit(state.setFetching(true));
+
+    try {
+      await _accountsRepository.createAccount(event.payload);
+
+      add(const AccountEventGetListRequested(loadMore: false));
+    } on Exception catch (e) {
+      add(AccountEventCreateFailure(message: e.toString()));
+    } finally {
+      emit(state.setFetching(false));
+    }
   }
 
   void _onAccountEventGetListRequested(

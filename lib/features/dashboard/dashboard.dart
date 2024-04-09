@@ -41,7 +41,7 @@ class DashboardState extends State<Dashboard> {
     if (_currentTab == DashboardBottomTab.accounts) {
       return FloatingActionButton.extended(
         onPressed: () {
-          context.go('/createAccountScreen');
+          GoRouter.of(context).pushNamed('createAccountScreen');
         },
         backgroundColor: Colors.lightGreenAccent,
         foregroundColor: Colors.black,

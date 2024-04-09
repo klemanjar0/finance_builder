@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'accounts.models.dart';
+import 'types.dart';
 
 sealed class AccountEvent extends Equatable {
   const AccountEvent();
@@ -39,9 +40,27 @@ final class AccountEventGetListFailure extends AccountEvent {
   List<Object> get props => [message];
 }
 
+final class AccountEventCreateFailure extends AccountEvent {
+  const AccountEventCreateFailure({required this.message});
+
+  final String message;
+
+  @override
+  List<Object> get props => [message];
+}
+
 final class AccountEventResetState extends AccountEvent {
   const AccountEventResetState();
 
   @override
   List<Object> get props => [];
+}
+
+final class AccountEventCreateRequested extends AccountEvent {
+  const AccountEventCreateRequested({required this.payload});
+
+  final AccountsCreateRequestPayload payload;
+
+  @override
+  List<Object> get props => [payload];
 }
