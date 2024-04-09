@@ -10,25 +10,24 @@ sealed class AccountEvent extends Equatable {
 }
 
 final class AccountEventGetListRequested extends AccountEvent {
-  const AccountEventGetListRequested(
-      {required this.limit, required this.offset});
+  const AccountEventGetListRequested({required this.loadMore});
 
-  final int limit;
-  final int offset;
+  final bool loadMore;
 
   @override
-  List<Object> get props => [limit, offset];
+  List<Object> get props => [loadMore];
 }
 
 final class AccountEventGetListReceived extends AccountEvent {
   const AccountEventGetListReceived(
-      {required this.accounts, required this.total});
+      {required this.accounts, required this.total, required this.loadMore});
 
   final List<Account> accounts;
   final int total;
+  final bool loadMore;
 
   @override
-  List<Object> get props => [accounts];
+  List<Object> get props => [accounts, total, loadMore];
 }
 
 final class AccountEventGetListFailure extends AccountEvent {

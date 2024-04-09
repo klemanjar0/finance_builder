@@ -1,17 +1,16 @@
 import 'package:finance_builder/api/AutoLogoutService.dart';
 import 'package:finance_builder/api/NetworkService.dart';
 import 'package:finance_builder/bootstrap.dart';
+import 'package:finance_builder/features/accounts/bloc/accounts.api.dart';
 import 'package:finance_builder/features/navigation/router.dart';
 import 'package:finance_builder/features/user/bloc/user.api.dart';
 import 'package:finance_builder/features/user/bloc/user.bloc.dart';
 import 'package:finance_builder/features/user/bloc/user.repository.dart';
-import 'package:finance_builder/features/user/bloc/user.state.dart';
-import 'package:finance_builder/models/account/account.localStorageApi.dart';
-import 'package:finance_builder/models/account/account.repository.dart';
 import 'package:finance_builder/theme/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'features/accounts/bloc/accounts.repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,11 +18,8 @@ Future<void> main() async {
   final autoLogoutService = AutoLogoutService();
   final networkService = NetworkService(autoLogoutService: autoLogoutService);
 
-  final accountsApi = AccountLocalStorage(
-    plugin: await SharedPreferences.getInstance(),
-  );
-
   final userApi = UserNetworkApi(networkService: networkService);
+  final accountsApi = AccountNetworkApi(networkService: networkService);
 
   bootstrap(
       accountApi: accountsApi,
@@ -34,7 +30,7 @@ Future<void> main() async {
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatelessWidget {
-  final AccountRepository accountRepository;
+  final AccountsRepository accountRepository;
   final UserRepository userRepository;
   final AutoLogoutService autoLogoutService;
 

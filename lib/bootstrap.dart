@@ -7,11 +7,12 @@ import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:finance_builder/bloc/AppBlocObserver.dart';
 import 'package:finance_builder/main.dart';
-import 'package:finance_builder/models/account/account.api.dart';
-import 'package:finance_builder/models/account/account.repository.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
+
+import 'features/accounts/bloc/accounts.api.dart';
+import 'features/accounts/bloc/accounts.repository.dart';
 
 void bootstrap(
     {required AccountApi accountApi,
@@ -30,7 +31,7 @@ void bootstrap(
 
   Bloc.observer = AppBlocObserver();
 
-  final accountRepository = AccountRepository(accountApi: accountApi);
+  final accountRepository = AccountsRepository(accountApi: accountApi);
   final userRepository = UserRepository(userApi: userApi);
 
   runZonedGuarded(
