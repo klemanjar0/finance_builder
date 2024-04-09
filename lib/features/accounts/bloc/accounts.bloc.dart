@@ -51,7 +51,6 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
     final data = event.loadMore
         ? <Account>[...state.accounts, ...event.accounts]
         : event.accounts;
-
     emit(AccountState.loaded(accounts: data, total: event.total));
   }
 

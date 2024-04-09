@@ -23,6 +23,10 @@ final class AutoLogoutService {
     _shouldLogOutStream.add(shouldLogout);
   }
 
+  bool hasListener() {
+    return _shouldLogOutStream.hasListener;
+  }
+
   void reset() {
     _shouldLogOutStream.add(false);
   }

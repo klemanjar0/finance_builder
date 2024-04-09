@@ -15,8 +15,9 @@ final class AccountsResponse {
 
   factory AccountsResponse.fromJson(Map<String, dynamic> json) {
     Iterable list = json['data'];
-    List<Account> accounts =
-        List<Account>.from(list.map((model) => Account.fromJson(model)));
+    List<Account> accounts = List<Account>.from(list.map((model) {
+      return Account.fromJson(model);
+    }));
     int total = json['pageable']['total'];
 
     return AccountsResponse(total: total, data: accounts);

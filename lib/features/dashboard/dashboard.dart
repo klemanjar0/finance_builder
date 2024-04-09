@@ -3,6 +3,8 @@ import 'package:finance_builder/utils/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../accounts/components/AccountsSection.dart';
+
 Widget getContentByTab(DashboardBottomTab tab) {
   switch (tab) {
     case DashboardBottomTab.home:
@@ -10,9 +12,7 @@ Widget getContentByTab(DashboardBottomTab tab) {
         'Home',
       );
     case DashboardBottomTab.accounts:
-      return const Text(
-        'Accounts',
-      );
+      return AccountsSection();
     case DashboardBottomTab.settings:
       return const Text(
         'Settings',

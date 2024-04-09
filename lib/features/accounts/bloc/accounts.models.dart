@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 @JsonSerializable()
 class Account extends Equatable {
@@ -19,24 +20,28 @@ class Account extends Equatable {
   final double budget;
 
   factory Account.fromJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {
-        'id': String id,
-        'name': String name,
-        'description': String description,
-        'currentBalance': double currentBalance,
-        'isFavorite': bool isFavorite,
-        'budget': double budget,
-      } =>
-        Account(
-            id: id,
-            name: name,
-            description: description,
-            currentBalance: currentBalance,
-            budget: budget,
-            isFavorite: isFavorite),
-      _ => throw const FormatException('Failed to load account.'),
-    };
+    try {
+      double currentBalance = json['currentBalance'] is int
+          ? json['currentBalance'].toDouble()
+          : json['currentBalance'];
+
+      double budget =
+          json['budget'] is int ? json['budget'].toDouble() : json['budget'];
+
+      List<int> buffer =
+          List<int>.from(json['id']['data'].map((model) => int.parse(model.toString())));
+
+      return Account(
+        id: Uuid.unparse(buffer),
+        name: json['name'],
+        description: json['description'],
+        currentBalance: currentBalance,
+        budget: budget,
+        isFavorite: json['isFavorite'],
+      );
+    } on Exception catch (e) {
+      throw FormatException('Failed to load account. ${e.toString()}');
+    }
   }
 
   Account copyWith(

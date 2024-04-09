@@ -124,12 +124,14 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
       emit(state.updateSync());
     });
 
-    _autoLogoutService.shouldLogout.listen((event) {
-      if (event) {
-        add(const UserEventSignOutRequested());
-        _autoLogoutService.reset();
-      }
-    });
+    if (!_autoLogoutService.hasListener()) {
+      _autoLogoutService.shouldLogout.listen((event) {
+        if (event) {
+          add(const UserEventSignOutRequested());
+          _autoLogoutService.reset();
+        }
+      });
+    }
   }
 
   late StreamSubscription<AuthenticationStatus>
@@ -196,14 +198,14 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     emit(state.copyWith(status: () => event.status));
   }
 
-  void _onUserEventCheckAuthRequested(event, emit) {
+  void _onUserEventCheckAuthRequested(UserEventCheckAuthRequested event, emit) {
     emit(state.updateSync());
     var username = state.user.username;
     var authToken = state.user.authToken;
     var isLoggedIn = authToken != null && username != null;
     if (isLoggedIn) {
       emit(UserState.authenticated(
-          user: User(authToken: event.authToken, username: event.username)));
+          user: User(authToken: authToken, username: username)));
     } else {
       emit(UserState.unauthenticated());
     }

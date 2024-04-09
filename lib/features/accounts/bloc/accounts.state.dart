@@ -62,5 +62,6 @@ class AccountState extends Equatable {
   }
 
   @override
-  List<Object> get props => [accounts, total, fetching, isLoaded];
+  List<Object> get props =>
+      [accounts, total, fetching, isLoaded, error.toString()];
 }
