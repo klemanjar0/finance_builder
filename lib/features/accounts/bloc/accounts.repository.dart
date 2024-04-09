@@ -10,4 +10,8 @@ class AccountsRepository {
   Future<AccountsResponse> getAccounts(AccountsRequestPayload payload) async {
     return _accountApi.getAccounts(payload);
   }
+
+  Future<void> createAccount(AccountsCreateRequestPayload payload) async {
+    return _accountApi.createAccount(payload);
+  }
 }

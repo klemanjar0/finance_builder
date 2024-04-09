@@ -6,6 +6,7 @@ abstract class AccountApi {
   const AccountApi();
 
   Future<AccountsResponse> getAccounts(AccountsRequestPayload payload);
+  Future<void> createAccount(AccountsCreateRequestPayload payload);
 }
 
 class AccountNetworkApi implements AccountApi {
@@ -26,5 +27,18 @@ class AccountNetworkApi implements AccountApi {
     var parsed = AccountsResponse.fromJson(response);
 
     return parsed;
+  }
+
+  @override
+  Future<void> createAccount(AccountsCreateRequestPayload payload) async {
+    final body = {
+      'name': payload.name,
+      'description': payload.description,
+      'budget': payload.budget
+    };
+
+    await _networkService.fetch(endpoint: Endpoint.createAccount, data: body);
+
+    return;
   }
 }

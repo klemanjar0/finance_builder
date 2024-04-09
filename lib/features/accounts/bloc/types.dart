@@ -7,6 +7,15 @@ final class AccountsRequestPayload {
   final int offset;
 }
 
+final class AccountsCreateRequestPayload {
+  const AccountsCreateRequestPayload(
+      {required this.name, required this.description, required this.budget});
+
+  final String name;
+  final String description;
+  final double budget;
+}
+
 final class AccountsResponse {
   const AccountsResponse({required this.total, required this.data});
 
