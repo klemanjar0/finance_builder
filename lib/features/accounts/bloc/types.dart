@@ -1,13 +1,24 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'accounts.models.dart';
 
-@JsonSerializable()
-class Account extends Equatable {
-  const Account({required this.id, required this.name});
+final class AccountsRequestPayload {
+  const AccountsRequestPayload({required this.limit, required this.offset});
 
-  final String id;
-  final String name;
+  final int limit;
+  final int offset;
+}
 
-  @override
-  List<Object?> get props => [id, name];
+final class AccountsResponse {
+  const AccountsResponse({required this.total, required this.data});
+
+  final List<Account> data;
+  final int total;
+
+  factory AccountsResponse.fromJson(Map<String, dynamic> json) {
+    Iterable list = json['data'];
+    List<Account> accounts =
+        List<Account>.from(list.map((model) => Account.fromJson(model)));
+    int total = json['pageable']['total'];
+
+    return AccountsResponse(total: total, data: accounts);
+  }
 }

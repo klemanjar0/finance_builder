@@ -11,7 +11,14 @@ const String _apiPath =
 
 enum RequestType { post, get, put, delete }
 
-enum Endpoint { empty, signUp, signIn }
+enum Endpoint {
+  empty,
+  signUp,
+  signIn,
+  getAccounts,
+  createAccount,
+  updateAccount
+}
 
 typedef ApiResponse = http.Response;
 
@@ -22,20 +29,33 @@ class EndpointConfig {
   const EndpointConfig({required this.path, required this.type});
 }
 
-const Map<Endpoint, EndpointConfig> _generalEndpoints = {
-  Endpoint.empty: EndpointConfig(path: '/', type: RequestType.get),
+Map<Endpoint, EndpointConfig Function(Map<String, String>?)> _generalEndpoints =
+    {
+  Endpoint.empty: (_) => const EndpointConfig(path: '/', type: RequestType.get),
 };
 
-const Map<Endpoint, EndpointConfig> _authEndpoints = {
-  Endpoint.signUp:
-      EndpointConfig(path: '/auth/register', type: RequestType.post),
-  Endpoint.signIn:
-      EndpointConfig(path: '/auth/sign_in', type: RequestType.post)
+Map<Endpoint, EndpointConfig Function(Map<String, String>?)> _authEndpoints = {
+  Endpoint.signUp: (_) =>
+      const EndpointConfig(path: '/auth/register', type: RequestType.post),
+  Endpoint.signIn: (_) =>
+      const EndpointConfig(path: '/auth/sign_in', type: RequestType.post)
 };
 
-final Map<Endpoint, EndpointConfig> _endpoints = {}
-  ..addAll(_generalEndpoints)
-  ..addAll(_authEndpoints);
+Map<Endpoint, EndpointConfig Function(Map<String, String>?)> _accountEndpoints =
+    {
+  Endpoint.getAccounts: (_) =>
+      const EndpointConfig(path: '/accounts', type: RequestType.get),
+  Endpoint.createAccount: (_) =>
+      const EndpointConfig(path: '/accounts', type: RequestType.post),
+  Endpoint.updateAccount: (extra) =>
+      EndpointConfig(path: '/accounts/${extra?['id']}', type: RequestType.put),
+};
+
+final Map<Endpoint, EndpointConfig Function(Map<String, String>?)> _endpoints =
+    {}
+      ..addAll(_generalEndpoints)
+      ..addAll(_authEndpoints)
+      ..addAll(_accountEndpoints);
 
 class NetworkException implements Exception {
   final String _message;
@@ -57,7 +77,7 @@ class NetworkException implements Exception {
 
 class NetworkService {
   static bool _isInstanceCreated = false;
-
+  static int timeoutSecondsDuration = 10;
   NetworkService({required AutoLogoutService autoLogoutService})
       : _autoLogoutService = autoLogoutService {
     var isValid = _init();
@@ -97,7 +117,7 @@ class NetworkService {
     bool isValid = true;
 
     for (Endpoint element in Endpoint.values) {
-      if (_endpoints[element]?.path == null) {
+      if (_endpoints[element] == null) {
         isValid = false;
       }
     }
@@ -105,49 +125,66 @@ class NetworkService {
     return isValid;
   }
 
-  String _buildRequestPath(Endpoint endpoint) {
-    var isInvalidPath = _endpoints[endpoint]?.path == null;
+  String _buildRequestPath(Endpoint endpoint, [dynamic extra]) {
+    var isInvalidPath = _endpoints[endpoint] == null;
 
     if (isInvalidPath) {
-      return _generalEndpoints[Endpoint.empty]!.path;
+      return _generalEndpoints[Endpoint.empty]!(extra).path;
     }
 
-    return _apiPath + _endpoints[endpoint]!.path;
+    return _apiPath + _endpoints[endpoint]!(extra).path;
+  }
+
+  String _buildQueryParams(Map<String, String>? queryParams) {
+    String value = '';
+
+    if (queryParams == null) {
+      return value;
+    }
+
+    value = queryParams.keys.map((key) => '$key=${queryParams[key]}').join('&');
+
+    return '?$value';
   }
 
   Future<ApiResponse> _doRequest(
       {required Endpoint endpoint,
       Object? data,
-      Map<dynamic, dynamic>? options}) async {
+      Map<dynamic, dynamic>? options,
+      Map<String, String>? queryParams,
+      Map<String, String>? extra}) async {
+    var query = _buildQueryParams(queryParams);
     var path = _buildRequestPath(endpoint);
-    var endpointConfig = _endpoints[endpoint]!;
+    var endpointConfig = _endpoints[endpoint]!(extra);
+
+    var uri = Uri.parse('$path$query');
 
     switch (endpointConfig.type) {
       case RequestType.post:
         {
           var res = await http
-              .post(Uri.parse(path), headers: _defaultHeaders, body: data)
-              .timeout(const Duration(seconds: 5));
+              .post(uri, headers: _defaultHeaders, body: data)
+              .timeout(Duration(seconds: timeoutSecondsDuration));
 
           return res;
         }
       case RequestType.get:
         {
           return http
-              .get(Uri.parse(path), headers: _defaultHeaders)
-              .timeout(const Duration(seconds: 5));
+              .get(uri, headers: _defaultHeaders)
+              .timeout(Duration(seconds: timeoutSecondsDuration));
         }
       case RequestType.put:
         {
           return http
-              .put(Uri.parse(path), headers: _defaultHeaders, body: data)
-              .timeout(const Duration(seconds: 5));
+              .put(uri, headers: _defaultHeaders, body: data)
+              .timeout(Duration(seconds: timeoutSecondsDuration));
         }
       case RequestType.delete:
         {
           return http
-              .delete(Uri.parse(path), headers: _defaultHeaders, body: data)
-              .timeout(const Duration(seconds: 5));
+              .delete(uri, headers: _defaultHeaders, body: data)
+              .timeout(Duration(seconds: timeoutSecondsDuration));
         }
     }
   }
@@ -155,10 +192,16 @@ class NetworkService {
   Future<JsonMap> fetch(
       {required Endpoint endpoint,
       Object? data,
-      Map<dynamic, dynamic>? options}) async {
+      Map<dynamic, dynamic>? options,
+      Map<String, String>? queryParams,
+      Map<String, String>? extra}) async {
     var successCodes = [200, 201, 204];
-    var response =
-        await _doRequest(endpoint: endpoint, data: data, options: options);
+    var response = await _doRequest(
+        endpoint: endpoint,
+        data: data,
+        options: options,
+        queryParams: queryParams,
+        extra: extra);
 
     _autoLogoutService.checkStatusCode(response.statusCode);
 

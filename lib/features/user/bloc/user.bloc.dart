@@ -173,7 +173,6 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
     add(const UserEventResetError());
     add(const UserEventSetFetching(flag: true));
     try {
-      print('_onUserEventSignInRequested');
       var result = await _userRepository.signIn(
           username: event.username, password: event.password);
 
