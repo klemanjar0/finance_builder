@@ -43,21 +43,28 @@ class AccountsSectionState extends State<AccountsSection> {
                   padding: const EdgeInsets.all(8),
                   child: Text(state.error!),
                 ),
-              if (state.fetching)
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                  child: CircularProgressIndicator(),
-                ),
               Expanded(
                   child: ListView.builder(
-                      //controller: _scrollController,
+                      controller: _scrollController,
                       padding: const EdgeInsets.all(8),
-                      itemCount: state.accounts.length,
+                      itemCount: state.accounts.length + 1,
                       itemBuilder: (BuildContext context, int index) {
-                        var accountData = state.accounts[index];
-                        return AccountUI(
-                          account: accountData,
-                        );
+                        var array = state.accounts;
+                        if (index == array.length) {
+                          return Visibility(
+                              visible: state.fetching,
+                              child: const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ));
+                        } else {
+                          var accountData = state.accounts[index];
+                          return AccountUI(
+                            account: accountData,
+                          );
+                        }
                       })),
             ],
           ),

@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 import '../features/navigation/router.dart';
 import 'AutoLogoutService.dart';
 
-const String _apiPath = 'http://localhost:3000';
+const String _apiPath = 'https://finance-builder-api-005dc9562a36.herokuapp.com';
 
 enum RequestType { post, get, put, delete }
 
