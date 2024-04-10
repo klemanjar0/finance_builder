@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import '../bloc/accounts.models.dart';
 
 class AccountUI extends StatefulWidget {
-  const AccountUI({super.key, required this.account});
+  const AccountUI({super.key, required this.account, required this.onDelete});
 
   final Account account;
+  final void Function() onDelete;
 
   @override
   AccountUIState createState() => AccountUIState();
@@ -55,7 +56,7 @@ class AccountUIState extends State<AccountUI> with TickerProviderStateMixin {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
@@ -69,6 +70,9 @@ class AccountUIState extends State<AccountUI> with TickerProviderStateMixin {
                         ?.apply(color: Theme.of(context).colorScheme.primary),
                   ),
                 ),
+                TextButton(
+                    onPressed: widget.onDelete,
+                    child: const Icon(Icons.delete_outline, color: Colors.grey))
               ],
             ),
             Row(

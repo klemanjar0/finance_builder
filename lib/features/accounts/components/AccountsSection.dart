@@ -1,7 +1,10 @@
+import 'package:finance_builder/features/accounts/bloc/types.dart';
 import 'package:finance_builder/features/accounts/components/AccountItem.dart';
+import 'package:finance_builder/utils/utility.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../bloc/accounts.state.dart';
 import '../bloc/accounts.events.dart';
@@ -30,6 +33,36 @@ class AccountsSectionState extends State<AccountsSection> {
         }
       }
     });
+  }
+
+  void onDelete(BuildContext context,
+      {required String id, required String name}) {
+    showAlertDialog(context,
+        title: 'remove account',
+        content:
+            'are you sure you want delete account $name? this will also lead to removal of all transactions in this account.',
+        buttons: [
+          TextButton(
+            child: Text("chill, bro"),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            onPressed: () {
+              GoRouter.of(context).pop();
+            },
+          ),
+          TextButton(
+            child: Text("ok"),
+            onPressed: () {
+              print('here ${id}');
+              context.read<AccountsBloc>().add(AccountEventDeleteRequested(
+                  payload: AccountsRemoveRequestPayload(id: id)));
+              GoRouter.of(context).pop();
+              // do delete
+            },
+          )
+        ]);
+    // implement
   }
 
   Widget buildList(BuildContext context) {
@@ -61,9 +94,11 @@ class AccountsSectionState extends State<AccountsSection> {
                               ));
                         } else {
                           var accountData = state.accounts[index];
+
                           return AccountUI(
-                            account: accountData,
-                          );
+                              account: accountData,
+                              onDelete: () => onDelete(context,
+                                  id: accountData.id, name: accountData.name));
                         }
                       })),
             ],

@@ -62,5 +62,23 @@ final class AccountEventCreateRequested extends AccountEvent {
   final AccountsCreateRequestPayload payload;
 
   @override
-  List<Object> get props => [payload];
+  List<Object> get props => [payload.budget, payload.description, payload.name];
+}
+
+final class AccountEventDeleteRequested extends AccountEvent {
+  const AccountEventDeleteRequested({required this.payload});
+
+  final AccountsRemoveRequestPayload payload;
+
+  @override
+  List<Object> get props => [payload.id];
+}
+
+final class AccountEventDeleteFailure extends AccountEvent {
+  const AccountEventDeleteFailure({required this.message});
+
+  final String message;
+
+  @override
+  List<Object> get props => [message];
 }

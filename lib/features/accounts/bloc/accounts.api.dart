@@ -7,6 +7,7 @@ abstract class AccountApi {
 
   Future<AccountsResponse> getAccounts(AccountsRequestPayload payload);
   Future<void> createAccount(AccountsCreateRequestPayload payload);
+  Future<void> removeAccount(AccountsRemoveRequestPayload payload);
 }
 
 class AccountNetworkApi implements AccountApi {
@@ -38,6 +39,14 @@ class AccountNetworkApi implements AccountApi {
     };
 
     await _networkService.fetch(endpoint: Endpoint.createAccount, data: body);
+
+    return;
+  }
+
+  @override
+  Future<void> removeAccount(AccountsRemoveRequestPayload payload) async {
+    await _networkService
+        .fetch(endpoint: Endpoint.deleteAccount, extra: {'id': payload.id});
 
     return;
   }

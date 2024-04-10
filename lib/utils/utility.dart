@@ -35,3 +35,26 @@ void showToast(String msg) {
       textColor: Colors.lightGreenAccent,
       fontSize: 22.0);
 }
+
+void showAlertDialog(BuildContext context,
+    {required List<TextButton> buttons,
+    required String title,
+    String? content}) {
+  var exampleButton = TextButton(
+    child: Text("Remind me later"),
+    onPressed: () {},
+  );
+
+  AlertDialog alert = AlertDialog(
+    title: Text(title),
+    content: Text(content ?? ''),
+    actions: buttons,
+  );
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}

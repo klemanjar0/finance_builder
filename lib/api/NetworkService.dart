@@ -9,7 +9,8 @@ import 'package:http/http.dart' as http;
 import '../features/navigation/router.dart';
 import 'AutoLogoutService.dart';
 
-const String _apiPath = 'https://finance-builder-api-005dc9562a36.herokuapp.com';
+const String _apiPath =
+    'https://finance-builder-api-005dc9562a36.herokuapp.com';
 
 enum RequestType { post, get, put, delete }
 
@@ -19,7 +20,8 @@ enum Endpoint {
   signIn,
   getAccounts,
   createAccount,
-  updateAccount
+  updateAccount,
+  deleteAccount
 }
 
 typedef ApiResponse = http.Response;
@@ -52,6 +54,11 @@ Map<Endpoint, EndpointConfig Function(Map<String, String>?)> _accountEndpoints =
       const EndpointConfig(path: '/accounts', type: RequestType.post),
   Endpoint.updateAccount: (extra) =>
       EndpointConfig(path: '/accounts/${extra?['id']}', type: RequestType.put),
+  Endpoint.deleteAccount: (extra) {
+    var id = extra?['id'];
+    print('ID $id');
+    return EndpointConfig(path: '/accounts/$id', type: RequestType.delete);
+  },
 };
 
 final Map<Endpoint, EndpointConfig Function(Map<String, String>?)> _endpoints =
@@ -132,7 +139,7 @@ class NetworkService {
     var isInvalidPath = _endpoints[endpoint] == null;
 
     if (isInvalidPath) {
-      return _generalEndpoints[Endpoint.empty]!(extra).path;
+      return _apiPath + _generalEndpoints[Endpoint.empty]!(extra).path;
     }
 
     return _apiPath + _endpoints[endpoint]!(extra).path;
@@ -159,10 +166,9 @@ class NetworkService {
     var query = _buildQueryParams(queryParams);
     var path = _buildRequestPath(endpoint);
     var endpointConfig = _endpoints[endpoint]!(extra);
-
     var uri = Uri.parse('$path$query');
     var headers = _defaultHeaders..addAll(endpointConfig.headers ?? {});
-
+    print(uri);
     switch (endpointConfig.type) {
       case RequestType.post:
         {

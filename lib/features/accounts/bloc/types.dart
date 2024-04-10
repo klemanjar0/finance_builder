@@ -16,6 +16,12 @@ final class AccountsCreateRequestPayload {
   final double budget;
 }
 
+final class AccountsRemoveRequestPayload {
+  const AccountsRemoveRequestPayload({required this.id});
+
+  final String id;
+}
+
 final class AccountsResponse {
   const AccountsResponse({required this.total, required this.data});
 

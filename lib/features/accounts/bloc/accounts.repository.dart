@@ -14,4 +14,8 @@ class AccountsRepository {
   Future<void> createAccount(AccountsCreateRequestPayload payload) async {
     return _accountApi.createAccount(payload);
   }
+
+  Future<void> removeAccount(AccountsRemoveRequestPayload payload) async {
+    return _accountApi.removeAccount(payload);
+  }
 }

@@ -17,14 +17,36 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
     on<AccountEventGetListFailure>(_onAccountEventGetListFailure);
     on<AccountEventCreateRequested>(_onAccountEventCreateRequested);
     on<AccountEventCreateFailure>(_onAccountEventCreateFailure);
+    on<AccountEventDeleteRequested>(_onAccountEventDeleteRequested);
+    on<AccountEventDeleteFailure>(_onAccountEventDeleteFailure);
   }
 
   final AccountsRepository _accountsRepository;
   final int _limit = 15;
 
+  void _onAccountEventDeleteRequested(
+      AccountEventDeleteRequested event, Emitter<AccountState> emit) async {
+    emit(state.setFetching(true));
+
+    try {
+      await _accountsRepository.removeAccount(event.payload);
+
+      add(const AccountEventGetListRequested(loadMore: false));
+    } on Exception catch (e) {
+      showToast('Failed to delete account: ${e.toString()}');
+    } finally {
+      emit(state.setFetching(false));
+    }
+  }
+
   void _onAccountEventResetState(
       AccountEventResetState event, Emitter<AccountState> emit) {
     emit(AccountState.empty());
+  }
+
+  void _onAccountEventDeleteFailure(
+      AccountEventDeleteFailure event, Emitter<AccountState> emit) {
+    emit(AccountState.failure(event.message));
   }
 
   void _onAccountEventCreateFailure(
