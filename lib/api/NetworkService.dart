@@ -1,13 +1,15 @@
 import 'dart:convert';
 
 import 'package:finance_builder/models/JsonMap.dart';
+import 'package:finance_builder/utils/utility.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
 import '../features/navigation/router.dart';
 import 'AutoLogoutService.dart';
 
-const String _apiPath =
-    'https://finance-builder-api-005dc9562a36.herokuapp.com';
+const String _apiPath = 'http://localhost:3000';
 
 enum RequestType { post, get, put, delete }
 
@@ -25,8 +27,9 @@ typedef ApiResponse = http.Response;
 class EndpointConfig {
   final String path;
   final RequestType type;
+  final Map<String, String>? headers;
 
-  const EndpointConfig({required this.path, required this.type});
+  const EndpointConfig({required this.path, required this.type, this.headers});
 }
 
 Map<Endpoint, EndpointConfig Function(Map<String, String>?)> _generalEndpoints =
@@ -95,7 +98,7 @@ class NetworkService {
 
   final AutoLogoutService _autoLogoutService;
 
-  Map<String, String> _defaultHeaders = {};
+  Map<String, String> _defaultHeaders = {"Content-Type": "application/json"};
 
   Map<String, String> get headers {
     return _defaultHeaders;
@@ -158,12 +161,13 @@ class NetworkService {
     var endpointConfig = _endpoints[endpoint]!(extra);
 
     var uri = Uri.parse('$path$query');
+    var headers = _defaultHeaders..addAll(endpointConfig.headers ?? {});
 
     switch (endpointConfig.type) {
       case RequestType.post:
         {
           var res = await http
-              .post(uri, headers: _defaultHeaders, body: data)
+              .post(uri, headers: headers, body: jsonEncode(data))
               .timeout(Duration(seconds: timeoutSecondsDuration));
 
           return res;
@@ -171,19 +175,19 @@ class NetworkService {
       case RequestType.get:
         {
           return http
-              .get(uri, headers: _defaultHeaders)
+              .get(uri, headers: headers)
               .timeout(Duration(seconds: timeoutSecondsDuration));
         }
       case RequestType.put:
         {
           return http
-              .put(uri, headers: _defaultHeaders, body: data)
+              .put(uri, headers: headers, body: jsonEncode(data))
               .timeout(Duration(seconds: timeoutSecondsDuration));
         }
       case RequestType.delete:
         {
           return http
-              .delete(uri, headers: _defaultHeaders, body: data)
+              .delete(uri, headers: headers, body: jsonEncode(data))
               .timeout(Duration(seconds: timeoutSecondsDuration));
         }
     }
@@ -206,9 +210,11 @@ class NetworkService {
     _autoLogoutService.checkStatusCode(response.statusCode);
 
     if (!successCodes.contains(response.statusCode)) {
+      var data = jsonDecode(response.body)['message'];
+      var errorMessage = data is List ? data[0] : data;
+
       throw NetworkException(
-          jsonDecode(response.body)['message'] ?? 'Unknown error',
-          response.statusCode);
+          errorMessage ?? 'Unknown error', response.statusCode);
     }
 
     return jsonDecode(response.body) as JsonMap;

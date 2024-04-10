@@ -24,11 +24,9 @@ class SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (_) => UserBloc(
-              userRepository: context.read<UserRepository>(),
-              autoLogoutService: context.read<AutoLogoutService>(),
-            )..add(const UserEventCheckAuthRequested()),
+    return BlocProvider.value(
+        value: context.read<UserBloc>()
+          ..add(const UserEventCheckAuthRequested()),
         child: BlocListener<UserBloc, UserState>(
           listener: (context, state) {
             Future<void>.delayed(const Duration(seconds: 2)).then((_) {
@@ -47,11 +45,7 @@ class SplashScreenState extends State<SplashScreen> {
               title: Text(widget.title),
             ),
             body: Container(
-              child: Center(child:
-                  BlocBuilder<UserBloc, UserState>(builder: (context, state) {
-                //print(state);
-                return const CircularProgressIndicator();
-              })),
+              child: const Center(child: CircularProgressIndicator()),
             ),
           ),
         ));

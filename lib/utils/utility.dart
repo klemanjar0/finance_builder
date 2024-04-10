@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 class Utility {
   static int _uniqueIdStepper = 0;
 
@@ -20,4 +23,15 @@ DashboardBottomTab getDashboardBottomTabByIndex(int index) {
   }
 
   return DashboardBottomTab.home;
+}
+
+void showToast(String msg) {
+  Fluttertoast.showToast(
+      msg: msg,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 3,
+      backgroundColor: Colors.black87,
+      textColor: Colors.lightGreenAccent,
+      fontSize: 22.0);
 }

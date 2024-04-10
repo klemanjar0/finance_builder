@@ -110,7 +110,7 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
         _autoLogoutService = autoLogoutService,
         super(UserState.unknown()) {
     on<UserEventSignInRequested>(_onUserEventSignInRequested);
-    on<UserEventStatusChanged>(_UserEventStatusChanged);
+    on<UserEventStatusChanged>(_onUserEventStatusChanged);
     on<UserEventSignInSubmitted>(_onUserEventSignInSubmitted);
     on<UserEventSignOutRequested>(_onUserEventSignOutRequested);
     on<UserEventCheckAuthRequested>(_onUserEventCheckAuthRequested);
@@ -193,13 +193,12 @@ class UserBloc extends HydratedBloc<UserEvent, UserState> {
         user: User(authToken: event.authToken, username: event.username)));
   }
 
-  void _UserEventStatusChanged(
+  void _onUserEventStatusChanged(
       UserEventStatusChanged event, Emitter<UserState> emit) {
     emit(state.copyWith(status: () => event.status));
   }
 
   void _onUserEventCheckAuthRequested(UserEventCheckAuthRequested event, emit) {
-    emit(state.updateSync());
     var username = state.user.username;
     var authToken = state.user.authToken;
     var isLoggedIn = authToken != null && username != null;

@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:finance_builder/features/accounts/bloc/accounts.models.dart';
+import 'package:finance_builder/utils/utility.dart';
 
 import 'accounts.events.dart';
 import 'accounts.repository.dart';
@@ -41,6 +42,7 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
       add(const AccountEventGetListRequested(loadMore: false));
     } on Exception catch (e) {
       add(AccountEventCreateFailure(message: e.toString()));
+      showToast('Failed to create account: ${e.toString()}');
     } finally {
       emit(state.setFetching(false));
     }

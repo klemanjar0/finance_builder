@@ -2,6 +2,7 @@ import 'package:finance_builder/api/AutoLogoutService.dart';
 import 'package:finance_builder/api/NetworkService.dart';
 import 'package:finance_builder/bootstrap.dart';
 import 'package:finance_builder/features/accounts/bloc/accounts.api.dart';
+import 'package:finance_builder/features/accounts/bloc/accounts.bloc.dart';
 import 'package:finance_builder/features/navigation/router.dart';
 import 'package:finance_builder/features/user/bloc/user.api.dart';
 import 'package:finance_builder/features/user/bloc/user.bloc.dart';
@@ -9,7 +10,7 @@ import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:finance_builder/theme/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
 import 'features/accounts/bloc/accounts.repository.dart';
 
 Future<void> main() async {
@@ -48,12 +49,15 @@ class MyApp extends StatelessWidget {
         RepositoryProvider.value(value: userRepository),
         RepositoryProvider.value(value: autoLogoutService),
       ],
-      child: BlocProvider(
-          create: (_) => UserBloc(
-                userRepository: context.read<UserRepository>(),
-                autoLogoutService: context.read<AutoLogoutService>(),
-              ),
-          child: MaterialApp.router(routerConfig: router, theme: themeData)),
+      child: MultiBlocProvider(providers: [
+        BlocProvider<UserBloc>(
+            create: (_) => UserBloc(
+                  userRepository: userRepository,
+                  autoLogoutService: autoLogoutService,
+                )),
+        BlocProvider<AccountsBloc>(
+            create: (_) => AccountsBloc(accountsRepository: accountRepository))
+      ], child: MaterialApp.router(routerConfig: router, theme: themeData)),
     );
   }
 }

@@ -38,11 +38,8 @@ class BottomNavBarState extends State<BottomNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (_) => UserBloc(
-              userRepository: context.read<UserRepository>(),
-              autoLogoutService: context.read<AutoLogoutService>(),
-            ),
+    return BlocProvider.value(
+        value: context.read<UserBloc>(),
         child: BlocBuilder<UserBloc, UserState>(builder: (context, state) {
           return BottomNavigationBar(
             items: <BottomNavigationBarItem>[

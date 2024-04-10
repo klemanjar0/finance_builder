@@ -81,5 +81,5 @@ class UserState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [user, status, fetching, message, sync];
+  List<Object?> get props => [user.authToken, user.username, status, fetching, message, sync];
 }

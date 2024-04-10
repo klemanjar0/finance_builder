@@ -1,3 +1,5 @@
+import 'package:finance_builder/features/accounts/bloc/accounts.state.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
@@ -47,19 +49,22 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
       return 'budget is empty';
     }
 
+    if (double.tryParse(budget) == null) {
+      return 'budget is empty';
+    }
+
     return null;
   }
 
   void onCreate(BuildContext context) {
     resetError();
-
     var name = _nameController.value.text;
     var description = _descriptionController.value.text;
     var budget = _budgetController.value.text;
 
     var message = validate(name, description, budget);
 
-    if (message == null) {
+    if (message != null) {
       setState(() {
         error = message;
       });
@@ -77,24 +82,11 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) =>
-          AccountsBloc(accountsRepository: context.read<AccountsRepository>()),
+    return BlocProvider.value(
+      value: context.read<AccountsBloc>(),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Create Account'),
-          actions: [
-            IconButton(
-              icon: const Icon(
-                Icons.add,
-                size: 32,
-              ),
-              tooltip: 'Create',
-              onPressed: () {
-                onCreate(context);
-              },
-            ),
-          ],
         ),
         body: SafeArea(
             child: Container(
@@ -144,6 +136,41 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
                   hintText: 'do we have limits?',
                 ),
               ),
+              const SizedBox(
+                height: 24,
+              ),
+              Text(
+                error ?? '',
+                textAlign: TextAlign.center,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.apply(color: Theme.of(context).colorScheme.error),
+              ),
+              const SizedBox(
+                height: 24,
+              ),
+              BlocBuilder<AccountsBloc, AccountState>(
+                  builder: (context, state) {
+                return FilledButton.icon(
+                    onPressed: state.fetching
+                        ? null
+                        : () {
+                            onCreate(context);
+                          },
+                    icon: state.fetching
+                        ? Container(
+                            width: 24,
+                            height: 24,
+                            padding: const EdgeInsets.all(2.0),
+                            child: const CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
+                          )
+                        : const Icon(Icons.login_outlined),
+                    label: const Text('wanna new account!'));
+              }),
             ],
           ),
         )),

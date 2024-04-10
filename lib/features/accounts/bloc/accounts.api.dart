@@ -31,7 +31,7 @@ class AccountNetworkApi implements AccountApi {
 
   @override
   Future<void> createAccount(AccountsCreateRequestPayload payload) async {
-    final body = {
+    final Map<String, dynamic> body = {
       'name': payload.name,
       'description': payload.description,
       'budget': payload.budget

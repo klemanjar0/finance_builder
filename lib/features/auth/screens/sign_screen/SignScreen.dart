@@ -50,11 +50,8 @@ class SignScreenState extends State<SignScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (_) => UserBloc(
-              userRepository: context.read<UserRepository>(),
-              autoLogoutService: context.read<AutoLogoutService>(),
-            ),
+    return BlocProvider.value(
+        value: context.read<UserBloc>(),
         child: Scaffold(
           appBar: AppBar(
             title: const Text('Sign In'),

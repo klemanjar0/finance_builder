@@ -72,10 +72,9 @@ class AccountsSectionState extends State<AccountsSection> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (_) =>
-            AccountsBloc(accountsRepository: context.read<AccountsRepository>())
-              ..add(const AccountEventGetListRequested(loadMore: false)),
+    return BlocProvider.value(
+        value: context.read<AccountsBloc>()
+          ..add(const AccountEventGetListRequested(loadMore: false)),
         child: Container(
           child: buildList(context),
         ));
