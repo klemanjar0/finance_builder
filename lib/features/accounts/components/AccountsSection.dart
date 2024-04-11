@@ -1,3 +1,4 @@
+import 'package:finance_builder/components/SortingBottomSheet/SortingBottomSheet.dart';
 import 'package:finance_builder/features/accounts/bloc/types.dart';
 import 'package:finance_builder/features/accounts/components/AccountItem.dart';
 import 'package:finance_builder/utils/utility.dart';
@@ -76,6 +77,34 @@ class AccountsSectionState extends State<AccountsSection> {
                   padding: const EdgeInsets.all(8),
                   child: Text(state.error!),
                 ),
+              Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: FilledButton.icon(
+                    icon: state.sortOption.direction == SortDirection.asc
+                        ? Icon(Icons.arrow_upward)
+                        : Icon(Icons.arrow_downward),
+                    label: Text('sort by ${state.sortOption.field}'),
+                    onPressed: () {
+                      showBottomSort(
+                          context,
+                          BottomSortConfig(
+                              selected: state.sortOption,
+                              onSubmit: (SortOption option) {
+                                context.read<AccountsBloc>().add(
+                                    AccountEventSetSort(sortOption: option));
+                              },
+                              options: const [
+                                SortParam(field: 'name', label: 'name'),
+                                SortParam(
+                                    field: 'description', label: 'description'),
+                                SortParam(field: 'budget', label: 'budget'),
+                                SortParam(
+                                    field: 'currentBalance',
+                                    label: 'spent')
+                              ]));
+                    },
+                  )),
               Expanded(
                   child: ListView.builder(
                       controller: _scrollController,
@@ -93,7 +122,7 @@ class AccountsSectionState extends State<AccountsSection> {
                                 ),
                               ));
                         } else {
-                          var accountData = state.accounts[index];
+                          var accountData = array[index];
 
                           return AccountUI(
                               account: accountData,

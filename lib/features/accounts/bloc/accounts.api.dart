@@ -1,4 +1,5 @@
 import 'package:finance_builder/api/NetworkService.dart';
+import 'package:finance_builder/components/SortingBottomSheet/SortingBottomSheet.dart';
 
 import 'types.dart';
 
@@ -18,9 +19,12 @@ class AccountNetworkApi implements AccountApi {
 
   @override
   Future<AccountsResponse> getAccounts(AccountsRequestPayload payload) async {
+    var direction =
+        payload.sortOption.direction == SortDirection.asc ? 'asc' : 'desc';
     final queryParams = {
       'limit': payload.limit.toString(),
-      'offset': payload.offset.toString()
+      'offset': payload.offset.toString(),
+      'sort': "${payload.sortOption.field}:$direction"
     };
 
     var response = await _networkService.fetch(

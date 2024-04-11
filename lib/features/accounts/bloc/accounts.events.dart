@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:finance_builder/components/SortingBottomSheet/SortingBottomSheet.dart';
 
 import 'accounts.models.dart';
 import 'types.dart';
@@ -81,4 +82,13 @@ final class AccountEventDeleteFailure extends AccountEvent {
 
   @override
   List<Object> get props => [message];
+}
+
+final class AccountEventSetSort extends AccountEvent {
+  const AccountEventSetSort({required this.sortOption});
+
+  final SortOption sortOption;
+
+  @override
+  List<Object> get props => [sortOption.field, sortOption.direction];
 }

@@ -19,10 +19,18 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
     on<AccountEventCreateFailure>(_onAccountEventCreateFailure);
     on<AccountEventDeleteRequested>(_onAccountEventDeleteRequested);
     on<AccountEventDeleteFailure>(_onAccountEventDeleteFailure);
+    on<AccountEventSetSort>(_onAccountEventSetSort);
   }
 
   final AccountsRepository _accountsRepository;
   final int _limit = 15;
+
+  void _onAccountEventSetSort(
+      AccountEventSetSort event, Emitter<AccountState> emit) {
+    emit(state.setSort(event.sortOption));
+
+    add(const AccountEventGetListRequested(loadMore: false));
+  }
 
   void _onAccountEventDeleteRequested(
       AccountEventDeleteRequested event, Emitter<AccountState> emit) async {
@@ -46,12 +54,12 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
 
   void _onAccountEventDeleteFailure(
       AccountEventDeleteFailure event, Emitter<AccountState> emit) {
-    emit(AccountState.failure(event.message));
+    emit(state.failure(event.message));
   }
 
   void _onAccountEventCreateFailure(
       AccountEventCreateFailure event, Emitter<AccountState> emit) {
-    emit(AccountState.failure(event.message));
+    emit(state.failure(event.message));
   }
 
   void _onAccountEventCreateRequested(
@@ -73,13 +81,16 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
   void _onAccountEventGetListRequested(
       AccountEventGetListRequested event, Emitter<AccountState> emit) async {
     emit(state.resetError());
+    emit(state.resetData());
     emit(state.setFetching(true));
 
     try {
       var dataLength = state.accounts.length;
       var response = await _accountsRepository.getAccounts(
           AccountsRequestPayload(
-              limit: _limit, offset: event.loadMore ? dataLength : 0));
+              limit: _limit,
+              offset: event.loadMore ? dataLength : 0,
+              sortOption: state.sortOption));
 
       add(AccountEventGetListReceived(
           accounts: response.data,
@@ -97,11 +108,11 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
     final data = event.loadMore
         ? <Account>[...state.accounts, ...event.accounts]
         : event.accounts;
-    emit(AccountState.loaded(accounts: data, total: event.total));
+    emit(state.loaded(accounts: data, total: event.total));
   }
 
   void _onAccountEventGetListFailure(
       AccountEventGetListFailure event, Emitter<AccountState> emit) {
-    emit(AccountState.failure(event.message));
+    emit(state.failure(event.message));
   }
 }

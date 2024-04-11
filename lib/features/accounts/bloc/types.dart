@@ -1,10 +1,14 @@
+import 'package:finance_builder/components/SortingBottomSheet/SortingBottomSheet.dart';
+
 import 'accounts.models.dart';
 
 final class AccountsRequestPayload {
-  const AccountsRequestPayload({required this.limit, required this.offset});
+  const AccountsRequestPayload(
+      {required this.limit, required this.offset, required this.sortOption});
 
   final int limit;
   final int offset;
+  final SortOption sortOption;
 }
 
 final class AccountsCreateRequestPayload {
