@@ -1,6 +1,7 @@
 import 'package:finance_builder/components/TouchableOpacity/TouchableOpacity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 enum SortDirection { asc, desc }
@@ -39,33 +40,30 @@ Future showBottomSort(BuildContext context, BottomSortConfig sortConfig) {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: TextButton(
           child: Column(
             children: [
-              SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(option.label,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.apply(color: Colors.lightGreenAccent)),
+                      style: Theme.of(context).textTheme.titleMedium?.apply(
+                          color: isSelected
+                              ? Colors.lightGreenAccent
+                              : Colors.lightGreen)),
                   if (isSelected)
                     Container(
                         child: localSortOption.direction == SortDirection.asc
-                            ? Icon(
+                            ? const Icon(
                                 Icons.arrow_upward,
                                 color: Colors.lightGreenAccent,
                               )
-                            : Icon(Icons.arrow_downward,
+                            : const Icon(Icons.arrow_downward,
                                 color: Colors.lightGreenAccent))
                 ],
               ),
-              SizedBox(height: 8),
-              if (!isLast) Divider(),
             ],
           ),
           onPressed: () {
@@ -85,6 +83,12 @@ Future showBottomSort(BuildContext context, BottomSortConfig sortConfig) {
           padding: EdgeInsets.only(right: 8, left: 8, bottom: 32, top: 8),
           child: Column(
             children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                width: double.infinity,
+                child: Text('sort by',
+                    style: Theme.of(context).textTheme.titleMedium),
+              ),
               for (int i = 0; i < items.length; i++)
                 renderChild(
                     isLast: items.length - 1 == i,

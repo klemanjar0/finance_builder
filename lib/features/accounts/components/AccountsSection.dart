@@ -100,8 +100,7 @@ class AccountsSectionState extends State<AccountsSection> {
                                     field: 'description', label: 'description'),
                                 SortParam(field: 'budget', label: 'budget'),
                                 SortParam(
-                                    field: 'currentBalance',
-                                    label: 'spent')
+                                    field: 'currentBalance', label: 'spent')
                               ]));
                     },
                   )),

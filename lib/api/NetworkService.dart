@@ -56,7 +56,6 @@ Map<Endpoint, EndpointConfig Function(Map<String, String>?)> _accountEndpoints =
       EndpointConfig(path: '/accounts/${extra?['id']}', type: RequestType.put),
   Endpoint.deleteAccount: (extra) {
     var id = extra?['id'];
-    print('ID $id');
     return EndpointConfig(path: '/accounts/$id', type: RequestType.delete);
   },
 };
@@ -135,14 +134,8 @@ class NetworkService {
     return isValid;
   }
 
-  String _buildRequestPath(Endpoint endpoint, [dynamic extra]) {
-    var isInvalidPath = _endpoints[endpoint] == null;
-
-    if (isInvalidPath) {
-      return _apiPath + _generalEndpoints[Endpoint.empty]!(extra).path;
-    }
-
-    return _apiPath + _endpoints[endpoint]!(extra).path;
+  String _buildRequestPath(String path) {
+    return _apiPath + path;
   }
 
   String _buildQueryParams(Map<String, String>? queryParams) {
@@ -164,8 +157,8 @@ class NetworkService {
       Map<String, String>? queryParams,
       Map<String, String>? extra}) async {
     var query = _buildQueryParams(queryParams);
-    var path = _buildRequestPath(endpoint);
     var endpointConfig = _endpoints[endpoint]!(extra);
+    var path = _buildRequestPath(endpointConfig.path);
     var uri = Uri.parse('$path$query');
     var headers = _defaultHeaders..addAll(endpointConfig.headers ?? {});
     print(uri);
@@ -193,7 +186,7 @@ class NetworkService {
       case RequestType.delete:
         {
           return http
-              .delete(uri, headers: headers, body: jsonEncode(data))
+              .delete(uri, headers: headers)
               .timeout(Duration(seconds: timeoutSecondsDuration));
         }
     }

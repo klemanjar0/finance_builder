@@ -1,3 +1,4 @@
+import 'package:finance_builder/features/accounts/components/AccountScreen.dart';
 import 'package:finance_builder/features/auth/screens/sign_screen/SignScreen.dart';
 import 'package:finance_builder/features/dashboard/dashboard.dart';
 import 'package:finance_builder/features/splash/screens/SplashScreen.dart';
@@ -37,6 +38,12 @@ final router = GoRouter(
             path: 'dashboard/createAccountScreen',
             name: 'createAccountScreen',
             builder: (context, state) => CreateAccountScreen(),
+          ),
+          GoRoute(
+            path: 'dashboard/account/:id',
+            name: 'accountDetails',
+            builder: (context, state) =>
+                AccountScreen(id: state.pathParameters['id']!),
           ),
         ]),
   ],
