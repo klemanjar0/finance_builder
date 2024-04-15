@@ -12,9 +12,11 @@ sealed class AccountEvent extends Equatable {
 }
 
 final class AccountEventGetListRequested extends AccountEvent {
-  const AccountEventGetListRequested({required this.loadMore});
+  const AccountEventGetListRequested(
+      {required this.loadMore, this.autoTriggered});
 
   final bool loadMore;
+  final bool? autoTriggered;
 
   @override
   List<Object> get props => [loadMore];

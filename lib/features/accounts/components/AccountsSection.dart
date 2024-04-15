@@ -144,7 +144,8 @@ class AccountsSectionState extends State<AccountsSection> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
         value: context.read<AccountsBloc>()
-          ..add(const AccountEventGetListRequested(loadMore: false)),
+          ..add(const AccountEventGetListRequested(
+              loadMore: false, autoTriggered: true)),
         child: Container(
           child: buildList(context),
         ));

@@ -129,7 +129,7 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
 
   void _onAccountEventGetListRequested(
       AccountEventGetListRequested event, Emitter<AccountState> emit) async {
-    if (state.isLoaded) {
+    if (state.isLoaded && event.autoTriggered == true) {
       return;
     }
 
