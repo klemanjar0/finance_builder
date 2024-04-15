@@ -457,14 +457,26 @@ class AccountScreenState extends State<AccountScreen>
                         Container(
                           padding:
                               EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'expenses history',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineLarge
-                                ?.apply(
-                                    color: Colors.white, fontWeightDelta: 2),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'expenses history',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineLarge
+                                    ?.apply(
+                                        color: Colors.white,
+                                        fontWeightDelta: 2),
+                              ),
+                              TextButton(
+                                  onPressed: () {},
+                                  child: const Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 32,
+                                  )),
+                            ],
                           ),
                         ),
                         BlocBuilder<AccountsBloc, AccountState>(
