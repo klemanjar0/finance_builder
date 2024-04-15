@@ -1,3 +1,5 @@
+import 'package:finance_builder/features/accounts/bloc/accounts.models.dart';
+
 import 'accounts.api.dart';
 import 'types.dart';
 
@@ -17,5 +19,9 @@ class AccountsRepository {
 
   Future<void> removeAccount(AccountsRemoveRequestPayload payload) async {
     return _accountApi.removeAccount(payload);
+  }
+
+  Future<Account> getAccount(GetSingleAccountRequestPayload payload) async {
+    return _accountApi.getAccount(payload);
   }
 }

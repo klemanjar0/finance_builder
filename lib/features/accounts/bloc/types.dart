@@ -26,6 +26,18 @@ final class AccountsRemoveRequestPayload {
   final String id;
 }
 
+final class GetSingleAccountRequestPayload {
+  const GetSingleAccountRequestPayload({required this.id});
+
+  final String id;
+}
+
+final class GetSingleAccountSuccessPayload {
+  const GetSingleAccountSuccessPayload({required this.account});
+
+  final Account account;
+}
+
 final class AccountsResponse {
   const AccountsResponse({required this.total, required this.data});
 

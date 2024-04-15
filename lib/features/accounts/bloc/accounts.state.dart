@@ -9,7 +9,10 @@ class AccountState extends Equatable {
       required this.fetching,
       required this.isLoaded,
       required this.sortOption,
-      this.error});
+      this.error,
+      this.single,
+      required this.singleFetching,
+      this.singleError});
 
   final List<Account> accounts;
   final int total;
@@ -18,6 +21,10 @@ class AccountState extends Equatable {
   final String? error;
   final SortOption sortOption;
 
+  final bool singleFetching;
+  final Account? single;
+  final String? singleError;
+
   factory AccountState.empty() {
     return const AccountState(
         accounts: <Account>[],
@@ -25,7 +32,9 @@ class AccountState extends Equatable {
         fetching: false,
         isLoaded: false,
         sortOption: SortOption(field: 'name', direction: SortDirection.asc),
-        error: null);
+        error: null,
+        singleFetching: false,
+        single: null);
   }
 
   AccountState loaded({required List<Account> accounts, required int total}) {
@@ -35,7 +44,9 @@ class AccountState extends Equatable {
         fetching: false,
         isLoaded: true,
         error: null,
-        sortOption: sortOption);
+        sortOption: sortOption,
+        singleFetching: singleFetching,
+        single: single);
   }
 
   AccountState failure(String message) {
@@ -45,7 +56,9 @@ class AccountState extends Equatable {
         fetching: false,
         isLoaded: false,
         error: message,
-        sortOption: sortOption);
+        sortOption: sortOption,
+        singleFetching: singleFetching,
+        single: single);
   }
 
   AccountState setFetching(bool flag) {
@@ -55,7 +68,9 @@ class AccountState extends Equatable {
         fetching: flag,
         isLoaded: isLoaded,
         error: error,
-        sortOption: sortOption);
+        sortOption: sortOption,
+        singleFetching: singleFetching,
+        single: single);
   }
 
   AccountState resetError() {
@@ -65,7 +80,9 @@ class AccountState extends Equatable {
         fetching: fetching,
         isLoaded: isLoaded,
         error: null,
-        sortOption: sortOption);
+        sortOption: sortOption,
+        singleFetching: singleFetching,
+        single: single);
   }
 
   AccountState resetData() {
@@ -75,7 +92,9 @@ class AccountState extends Equatable {
         fetching: fetching,
         isLoaded: isLoaded,
         error: error,
-        sortOption: sortOption);
+        sortOption: sortOption,
+        singleFetching: singleFetching,
+        single: single);
   }
 
   AccountState setSort(SortOption sortOption) {
@@ -85,17 +104,72 @@ class AccountState extends Equatable {
         fetching: fetching,
         isLoaded: isLoaded,
         error: error,
-        sortOption: sortOption);
+        sortOption: sortOption,
+        singleFetching: singleFetching,
+        single: single);
+  }
+
+  AccountState setSingleFetching(bool flag) {
+    return AccountState(
+        accounts: accounts,
+        total: total,
+        fetching: fetching,
+        isLoaded: isLoaded,
+        error: error,
+        sortOption: sortOption,
+        singleFetching: flag,
+        single: single);
+  }
+
+  AccountState setSingle(Account? single) {
+    return AccountState(
+        accounts: accounts,
+        total: total,
+        fetching: fetching,
+        isLoaded: isLoaded,
+        error: error,
+        sortOption: sortOption,
+        singleFetching: singleFetching,
+        single: single);
+  }
+
+  AccountState setSingleError(String errorMessage) {
+    return AccountState(
+        accounts: accounts,
+        total: total,
+        fetching: fetching,
+        isLoaded: isLoaded,
+        error: error,
+        sortOption: sortOption,
+        singleFetching: singleFetching,
+        single: single,
+        singleError: errorMessage);
+  }
+
+  AccountState resetSingleError() {
+    return AccountState(
+        accounts: accounts,
+        total: total,
+        fetching: fetching,
+        isLoaded: isLoaded,
+        error: error,
+        sortOption: sortOption,
+        singleFetching: singleFetching,
+        single: single,
+        singleError: null);
   }
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         accounts,
         total,
         fetching,
         isLoaded,
-        error.toString(),
+        error,
         sortOption.direction,
-        sortOption.field
+        sortOption.field,
+        singleFetching,
+        single?.id,
+        singleError,
       ];
 }

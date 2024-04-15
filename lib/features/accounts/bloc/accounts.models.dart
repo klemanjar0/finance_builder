@@ -28,8 +28,8 @@ class Account extends Equatable {
       double budget =
           json['budget'] is int ? json['budget'].toDouble() : json['budget'];
 
-      List<int> buffer =
-          List<int>.from(json['id']['data'].map((model) => int.parse(model.toString())));
+      List<int> buffer = List<int>.from(
+          json['id']['data'].map((model) => int.parse(model.toString())));
 
       return Account(
         id: Uuid.unparse(buffer),
@@ -59,6 +59,12 @@ class Account extends Equatable {
       isFavorite: isFavorite ?? this.isFavorite,
       budget: budget ?? this.budget,
     );
+  }
+
+  @override
+  toString() {
+    return [id, name, description, currentBalance, isFavorite, budget]
+        .join(',');
   }
 
   @override

@@ -20,6 +20,14 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
     on<AccountEventDeleteRequested>(_onAccountEventDeleteRequested);
     on<AccountEventDeleteFailure>(_onAccountEventDeleteFailure);
     on<AccountEventSetSort>(_onAccountEventSetSort);
+    on<AccountEventGetSingleAccountRequested>(
+        _onAccountEventGetSingleAccountRequested);
+    on<AccountEventGetSingleAccountSuccess>(
+        _onAccountEventGetSingleAccountSuccess);
+    on<AccountEventGetSingleAccountFailed>(
+        _onAccountEventGetSingleAccountFailed);
+    on<AccountEventResetAccountError>(_onAccountEventResetAccountError);
+    on<AccountEventResetSingleAccount>(_onAccountEventResetSingleAccount);
   }
 
   final AccountsRepository _accountsRepository;
@@ -30,6 +38,47 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
     emit(state.setSort(event.sortOption));
 
     add(const AccountEventGetListRequested(loadMore: false));
+  }
+
+  void _onAccountEventResetSingleAccount(
+      AccountEventResetSingleAccount event, Emitter<AccountState> emit) {
+    emit(state.setSingle(null));
+  }
+
+  void _onAccountEventResetAccountError(event, emit) {
+    emit(state.resetSingleError());
+  }
+
+  void _onAccountEventGetSingleAccountFailed(
+      AccountEventGetSingleAccountFailed event, Emitter<AccountState> emit) {
+    emit(state.setSingleError(event.errorMessage));
+  }
+
+  void _onAccountEventGetSingleAccountSuccess(
+      AccountEventGetSingleAccountSuccess event, Emitter<AccountState> emit) {
+    emit(state.setSingle(event.payload.account));
+  }
+
+  void _onAccountEventGetSingleAccountRequested(
+      AccountEventGetSingleAccountRequested event,
+      Emitter<AccountState> emit) async {
+    if (state.single != null) {
+      return;
+    }
+
+    emit(state.resetSingleError());
+    emit(state.setSingleFetching(true));
+
+    try {
+      var account = await _accountsRepository.getAccount(event.payload);
+
+      add(AccountEventGetSingleAccountSuccess(
+          payload: GetSingleAccountSuccessPayload(account: account)));
+    } on Exception catch (e) {
+      showToast('Failed to open account: ${e.toString()}');
+    } finally {
+      emit(state.setSingleFetching(false));
+    }
   }
 
   void _onAccountEventDeleteRequested(
@@ -80,6 +129,10 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
 
   void _onAccountEventGetListRequested(
       AccountEventGetListRequested event, Emitter<AccountState> emit) async {
+    if (state.isLoaded) {
+      return;
+    }
+
     emit(state.resetError());
     emit(state.resetData());
     emit(state.setFetching(true));

@@ -29,7 +29,7 @@ final class AccountEventGetListReceived extends AccountEvent {
   final bool loadMore;
 
   @override
-  List<Object> get props => [accounts, total, loadMore];
+  List<Object> get props => [accounts.length, total, loadMore];
 }
 
 final class AccountEventGetListFailure extends AccountEvent {
@@ -91,4 +91,45 @@ final class AccountEventSetSort extends AccountEvent {
 
   @override
   List<Object> get props => [sortOption.field, sortOption.direction];
+}
+
+final class AccountEventGetSingleAccountRequested extends AccountEvent {
+  const AccountEventGetSingleAccountRequested({required this.payload});
+
+  final GetSingleAccountRequestPayload payload;
+
+  @override
+  List<Object> get props => [payload.id];
+}
+
+final class AccountEventGetSingleAccountSuccess extends AccountEvent {
+  const AccountEventGetSingleAccountSuccess({required this.payload});
+
+  final GetSingleAccountSuccessPayload payload;
+
+  @override
+  List<Object> get props => [payload.account.id];
+}
+
+final class AccountEventGetSingleAccountFailed extends AccountEvent {
+  const AccountEventGetSingleAccountFailed({required this.errorMessage});
+
+  final String errorMessage;
+
+  @override
+  List<Object> get props => [errorMessage];
+}
+
+final class AccountEventResetAccountError extends AccountEvent {
+  const AccountEventResetAccountError();
+
+  @override
+  List<Object> get props => [];
+}
+
+final class AccountEventResetSingleAccount extends AccountEvent {
+  const AccountEventResetSingleAccount();
+
+  @override
+  List<Object> get props => [];
 }

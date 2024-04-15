@@ -1,5 +1,6 @@
 import 'package:finance_builder/api/NetworkService.dart';
 import 'package:finance_builder/components/SortingBottomSheet/SortingBottomSheet.dart';
+import 'package:finance_builder/features/accounts/bloc/accounts.models.dart';
 
 import 'types.dart';
 
@@ -9,6 +10,7 @@ abstract class AccountApi {
   Future<AccountsResponse> getAccounts(AccountsRequestPayload payload);
   Future<void> createAccount(AccountsCreateRequestPayload payload);
   Future<void> removeAccount(AccountsRemoveRequestPayload payload);
+  Future<Account> getAccount(GetSingleAccountRequestPayload payload);
 }
 
 class AccountNetworkApi implements AccountApi {
@@ -30,6 +32,15 @@ class AccountNetworkApi implements AccountApi {
     var response = await _networkService.fetch(
         endpoint: Endpoint.getAccounts, queryParams: queryParams);
     var parsed = AccountsResponse.fromJson(response);
+
+    return parsed;
+  }
+
+  @override
+  Future<Account> getAccount(GetSingleAccountRequestPayload payload) async {
+    var response = await _networkService
+        .fetch(endpoint: Endpoint.getAccount, extra: {'id': payload.id});
+    var parsed = Account.fromJson(response);
 
     return parsed;
   }

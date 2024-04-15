@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 
 extension TextColors on ThemeData {
-  MaterialAccentColor get errorColor {
-    return Colors.redAccent;
+  Color get successGreen {
+    return const Color.fromRGBO(91, 215, 0, 1);
   }
 }
 
 final ThemeData themeData = ThemeData(
   useMaterial3: true,
+  primaryColorDark: Colors.black,
+  dividerColor: const Color.fromRGBO(200, 199, 204, 1),
   colorScheme: ColorScheme.fromSeed(
     seedColor: Colors.lightGreenAccent,
-    secondary: Colors.teal,
+    secondary: Colors.grey,
     brightness: Brightness.dark,
+    error: Colors.redAccent,
   ),
   textTheme: const TextTheme(
     displayLarge: TextStyle(
