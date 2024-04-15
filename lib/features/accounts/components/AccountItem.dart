@@ -47,7 +47,7 @@ class AccountUIState extends State<AccountUI> with TickerProviderStateMixin {
     super.initState();
   }
 
-  void goToDetails(BuildContext context) {
+  void goToDetails() {
     GoRouter.of(context)
         .pushNamed('accountDetails', pathParameters: {'id': widget.account.id});
   }
@@ -57,7 +57,7 @@ class AccountUIState extends State<AccountUI> with TickerProviderStateMixin {
     return Container(
         child: GestureDetector(
             onTap: () {
-              goToDetails(context);
+              goToDetails();
             },
             child: Card(
               child: Padding(

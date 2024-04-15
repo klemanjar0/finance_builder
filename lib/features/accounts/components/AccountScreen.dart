@@ -1,14 +1,17 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:finance_builder/features/accounts/bloc/accounts.bloc.dart';
 import 'package:finance_builder/features/accounts/bloc/accounts.events.dart';
 import 'package:finance_builder/features/accounts/bloc/accounts.models.dart';
 import 'package:finance_builder/features/accounts/bloc/accounts.state.dart';
 import 'package:finance_builder/features/accounts/bloc/types.dart';
+import 'package:finance_builder/theme/index.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:countup/countup.dart';
+import 'package:intl/intl.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key, required this.id});
@@ -23,9 +26,18 @@ class AccountScreenState extends State<AccountScreen>
     with TickerProviderStateMixin {
   late AnimationController controller;
   double percent = 0;
+  ScrollController _scrollController = ScrollController();
+  double _scrollPosition = 0;
+
+  _scrollListener() {
+    setState(() {
+      _scrollPosition = _scrollController.position.pixels;
+    });
+  }
 
   @override
   void initState() {
+    _scrollController.addListener(_scrollListener);
     controller = AnimationController(
         vsync: this, animationBehavior: AnimationBehavior.normal)
       ..addListener(() {
@@ -78,8 +90,140 @@ class AccountScreenState extends State<AccountScreen>
     }
   }
 
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('manage account'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextButton(
+                  onPressed: () {},
+                  child: Text('edit account metadata.',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .apply(color: Theme.of(context).colorScheme.primary)),
+                ),
+                const Divider(),
+                TextButton(
+                    onPressed: () {},
+                    child: Text('delete account.',
+                        style: Theme.of(context).textTheme.bodyMedium!.apply(
+                            color: Theme.of(context).colorScheme.error))),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _renderTransaction(Transaction item) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Text(
+                '\$ ${item.value}',
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineLarge!
+                    .apply(color: Theme.of(context).colorScheme.primary),
+              )
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'expense type (in dev)',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              Text(
+                DateFormat('dd MMM yyyy, HH:MM').format(item.createdAt),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _renderHeader(bool? showTitle, String? title) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        GestureDetector(
+          child: Container(
+            margin: EdgeInsets.all(16),
+            width: 48,
+            height: 48,
+            child: Center(
+              child: Icon(
+                Icons.chevron_left,
+                size: 32,
+              ),
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(100.0),
+              color: Theme.of(context).primaryColorDark,
+            ),
+          ),
+          onTap: () {
+            onBack(context);
+          },
+        ),
+        if (showTitle == true)
+          Text(
+            title ?? '',
+            style: Theme.of(context).textTheme.titleMedium?.apply(
+                fontSizeDelta: 4, fontWeightDelta: 3, color: Colors.white),
+          ),
+        BlocBuilder<AccountsBloc, AccountState>(builder: (context, state) {
+          return GestureDetector(
+            child: Container(
+              margin: EdgeInsets.all(16),
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100.0),
+                color: state.singleFetching
+                    ? Colors.transparent
+                    : Theme.of(context).primaryColorDark,
+              ),
+              child: state.singleFetching
+                  ? CircularProgressIndicator(
+                      color: Theme.of(context).primaryColorDark,
+                    )
+                  : const Center(
+                      child: Icon(
+                        Icons.apps_rounded,
+                        size: 32,
+                      ),
+                    ),
+            ),
+            onTap: () {
+              _showMyDialog();
+            },
+          );
+        }),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final safePadding = MediaQuery.of(context).padding.top;
+    final safePaddingBot = MediaQuery.of(context).padding.top;
+    final double value =
+        _scrollPosition > 140 ? _scrollPosition + safePadding : -100.0;
     return BlocProvider.value(
         value: context.read<AccountsBloc>()
           ..add(AccountEventGetSingleAccountRequested(
@@ -87,116 +231,196 @@ class AccountScreenState extends State<AccountScreen>
         child: BlocListener<AccountsBloc, AccountState>(
           listener: _onBlocListen,
           child: Scaffold(
-            body: SafeArea(
-                child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  AspectRatio(
-                    aspectRatio: 1,
-                    child: Container(
-                      margin: EdgeInsets.all(16),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32.0),
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              GestureDetector(
-                                child: Container(
-                                  margin: EdgeInsets.all(16),
-                                  width: 48,
-                                  height: 48,
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.chevron_left,
-                                      size: 32,
-                                    ),
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(100.0),
-                                    color: Theme.of(context).primaryColorDark,
-                                  ),
-                                ),
-                                onTap: () {
-                                  onBack(context);
-                                },
-                              ),
-                              BlocBuilder<AccountsBloc, AccountState>(
-                                  builder: (context, state) {
-                                if (state.singleFetching) {
-                                  return CircularProgressIndicator(
-                                    color: Theme.of(context).primaryColorDark,
-                                  );
-                                }
-
-                                return const SizedBox(width: 0, height: 0);
-                              }),
-                              GestureDetector(
-                                child: Container(
-                                  margin: EdgeInsets.all(16),
-                                  width: 48,
-                                  height: 48,
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.apps_rounded,
-                                      size: 32,
-                                    ),
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(100.0),
-                                    color: Theme.of(context).primaryColorDark,
-                                  ),
-                                ),
-                                onTap: () {
-                                  onBack(context);
-                                },
-                              )
-                            ],
-                          ),
-                          Expanded(
-                              child: Container(
-                            alignment: Alignment.centerLeft,
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              child: BlocBuilder<AccountsBloc, AccountState>(
-                                  builder: (context, state) {
-                                return Text(
-                                  state.singleFetching
-                                      ? "Loading..."
-                                      : state.single?.name ?? 'Failed to load',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.apply(
-                                          color: Theme.of(context)
-                                              .primaryColorDark,
-                                          fontWeightDelta: 4),
-                                );
-                              }),
+            body: SingleChildScrollView(
+                controller: _scrollController,
+                child: Stack(
+                  children: [
+                    Column(
+                      children: [
+                        SizedBox(
+                          height: safePadding,
+                        ),
+                        AspectRatio(
+                          aspectRatio: 1,
+                          child: Container(
+                            margin: EdgeInsets.all(16),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(32.0),
+                              color: Theme.of(context).colorScheme.primary,
                             ),
-                          )),
-                          Flexible(
-                              child: Container(
-                            alignment: Alignment.centerLeft,
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              child: BlocBuilder<AccountsBloc, AccountState>(
-                                  builder: (context, state) {
-                                return SingleChildScrollView(
-                                  child: Text(
-                                    state.singleFetching
-                                        ? "Loading..."
-                                        : state.single?.description ??
-                                            'Failed to load description',
-                                    overflow: TextOverflow.ellipsis,
+                            child: Column(
+                              children: [
+                                _renderHeader(false, null),
+                                Expanded(
+                                    child: Container(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
+                                    child:
+                                        BlocBuilder<AccountsBloc, AccountState>(
+                                            builder: (context, state) {
+                                      return Text(
+                                        state.singleFetching
+                                            ? "Loading..."
+                                            : state.single?.name ??
+                                                'Failed to load',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.apply(
+                                                color: Theme.of(context)
+                                                    .primaryColorDark,
+                                                fontWeightDelta: 4),
+                                      );
+                                    }),
+                                  ),
+                                )),
+                                Flexible(
+                                    child: Container(
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
+                                    child:
+                                        BlocBuilder<AccountsBloc, AccountState>(
+                                            builder: (context, state) {
+                                      return SingleChildScrollView(
+                                        child: Text(
+                                          state.singleFetching
+                                              ? "Loading..."
+                                              : state.single?.description ??
+                                                  'Failed to load description',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.apply(
+                                                color: Theme.of(context)
+                                                    .primaryColorDark,
+                                              ),
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                )),
+                                Spacer(),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Padding(
+                                            padding: EdgeInsets.only(
+                                                left: 16, right: 4),
+                                            child: Countup(
+                                              begin: 0,
+                                              end:
+                                                  percent, //here you insert the number or its variable
+                                              duration: const Duration(
+                                                  milliseconds: 450),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge
+                                                  ?.apply(
+                                                      fontSizeDelta: 4,
+                                                      fontWeightDelta: 3,
+                                                      color: Theme.of(context)
+                                                          .primaryColorDark),
+                                            )),
+                                        Text(
+                                          '%',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.apply(
+                                                  fontSizeDelta: 4,
+                                                  fontWeightDelta: 3,
+                                                  color: Theme.of(context)
+                                                      .primaryColorDark),
+                                        )
+                                      ],
+                                    ),
+                                    Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 16),
+                                      child: Text(
+                                        'spent of plan expenses',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.apply(
+                                              color: Theme.of(context)
+                                                  .primaryColorDark,
+                                            ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                Container(
+                                  padding: EdgeInsets.all(8.0),
+                                  width: double.infinity,
+                                  child: TweenAnimationBuilder<double>(
+                                    duration: const Duration(milliseconds: 450),
+                                    curve: Curves.easeInOut,
+                                    tween: Tween<double>(
+                                      begin: 0,
+                                      end: controller.value,
+                                    ),
+                                    builder: (context, value, _) =>
+                                        LinearProgressIndicator(
+                                      value: value,
+                                      borderRadius: BorderRadius.circular(32.0),
+                                      backgroundColor:
+                                          Theme.of(context).disabledColor,
+                                      color: Theme.of(context).primaryColorDark,
+                                      minHeight: 64,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Container(
+                          alignment: Alignment.center,
+                          width: double.infinity,
+                          margin: EdgeInsets.all(16),
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(32.0),
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          child: BlocBuilder<AccountsBloc, AccountState>(
+                            builder: (context, state) {
+                              if (state.singleFetching) {
+                                return AnimatedTextKit(
+                                  animatedTexts: [
+                                    TypewriterAnimatedText(
+                                      'Loading...',
+                                      textStyle: TextStyle(
+                                          fontSize: 18.0,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context)
+                                              .primaryColorDark),
+                                      speed: const Duration(milliseconds: 150),
+                                    ),
+                                  ],
+                                  repeatForever: true,
+                                  pause: const Duration(milliseconds: 75),
+                                );
+                              }
+
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'spent ',
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleMedium
@@ -205,144 +429,97 @@ class AccountScreenState extends State<AccountScreen>
                                               .primaryColorDark,
                                         ),
                                   ),
-                                );
-                              }),
-                            ),
-                          )),
-                          Spacer(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Row(
-                                children: [
-                                  Padding(
-                                      padding:
-                                          EdgeInsets.only(left: 16, right: 4),
-                                      child: Countup(
-                                        begin: 0,
-                                        end:
-                                            percent, //here you insert the number or its variable
-                                        duration:
-                                            const Duration(milliseconds: 450),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleLarge
-                                            ?.apply(
-                                                fontSizeDelta: 4,
-                                                fontWeightDelta: 3,
-                                                color: Theme.of(context)
-                                                    .primaryColorDark),
-                                      )),
                                   Text(
-                                    '%',
+                                    '${state.single?.currentBalance.toInt()}',
                                     style: Theme.of(context)
                                         .textTheme
-                                        .titleLarge
+                                        .titleMedium
                                         ?.apply(
-                                            fontSizeDelta: 4,
-                                            fontWeightDelta: 3,
                                             color: Theme.of(context)
-                                                .primaryColorDark),
+                                                .primaryColorDark,
+                                            fontWeightDelta: 3),
+                                  ),
+                                  Text(
+                                    ' of total budget ${state.single?.budget.toInt()}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.apply(
+                                          color: Theme.of(context)
+                                              .primaryColorDark,
+                                        ),
                                   )
                                 ],
-                              ),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16),
-                                child: Text(
-                                  'spent of plan expenses',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.apply(
-                                        color:
-                                            Theme.of(context).primaryColorDark,
-                                      ),
-                                ),
-                              )
-                            ],
+                              );
+                            },
                           ),
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            width: double.infinity,
-                            child: TweenAnimationBuilder<double>(
-                              duration: const Duration(milliseconds: 450),
-                              curve: Curves.easeInOut,
-                              tween: Tween<double>(
-                                begin: 0,
-                                end: controller.value,
-                              ),
-                              builder: (context, value, _) =>
-                                  LinearProgressIndicator(
-                                value: value,
-                                borderRadius: BorderRadius.circular(32.0),
-                                backgroundColor:
-                                    Theme.of(context).disabledColor,
-                                color: Theme.of(context).primaryColorDark,
-                                minHeight: 64,
-                              ),
+                        ),
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'expenses history',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineLarge
+                                ?.apply(
+                                    color: Colors.white, fontWeightDelta: 2),
+                          ),
+                        ),
+                        BlocBuilder<AccountsBloc, AccountState>(
+                            builder: (context, state) {
+                          if (state.single == null) {
+                            return const Text('Failed to load transactions');
+                          }
+                          return Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 16),
+                            child: Column(
+                              children: [
+                                for (var i = 0;
+                                    i < state.single!.transactions.length;
+                                    i++)
+                                  Column(
+                                    children: [
+                                      _renderTransaction(
+                                          state.single!.transactions[i]),
+                                      i == state.single!.transactions.length - 1
+                                          ? SizedBox()
+                                          : Divider()
+                                    ],
+                                  ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    width: double.infinity,
-                    margin: EdgeInsets.all(16),
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(32.0),
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    child: BlocBuilder<AccountsBloc, AccountState>(
-                      builder: (context, state) {
-                        if (state.singleFetching) {
-                          return CircularProgressIndicator(
-                            color: Theme.of(context).primaryColorDark,
                           );
-                        }
-
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              'spent ',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.apply(
-                                    color: Theme.of(context).primaryColorDark,
-                                  ),
-                            ),
-                            Text(
-                              '${state.single?.currentBalance.toInt()}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.apply(
-                                      color: Theme.of(context).primaryColorDark,
-                                      fontWeightDelta: 3),
-                            ),
-                            Text(
-                              ' of total budget ${state.single?.budget.toInt()}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.apply(
-                                    color: Theme.of(context).primaryColorDark,
-                                  ),
-                            )
-                          ],
-                        );
-                      },
+                        }),
+                        SizedBox(
+                          height: safePaddingBot,
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-            )),
+                    BlocBuilder<AccountsBloc, AccountState>(
+                        builder: (context, state) {
+                      return AnimatedPositioned(
+                        top: value - 250,
+                        right: 0,
+                        left: 0,
+                        duration: const Duration(milliseconds: 150),
+                        child: Container(
+                          height: 300,
+                          alignment: Alignment.bottomCenter,
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(32.0),
+                                bottomRight: Radius.circular(32.0)),
+                            color: Colors.black,
+                          ),
+                          child: _renderHeader(true, state.single?.name),
+                        ),
+                      );
+                    }),
+                  ],
+                )),
           ),
         ));
   }

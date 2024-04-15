@@ -4,13 +4,15 @@ import 'package:uuid/uuid.dart';
 
 @JsonSerializable()
 class Account extends Equatable {
-  const Account(
+  Account(
       {required this.id,
       required this.name,
       required this.description,
       required this.currentBalance,
       required this.budget,
-      required this.isFavorite});
+      required this.isFavorite,
+      List<Transaction>? transactions})
+      : transactions = transactions ?? <Transaction>[];
 
   final String id;
   final String name;
@@ -18,6 +20,7 @@ class Account extends Equatable {
   final double currentBalance;
   final bool isFavorite;
   final double budget;
+  final List<Transaction> transactions;
 
   factory Account.fromJson(Map<String, dynamic> json) {
     try {
@@ -31,6 +34,11 @@ class Account extends Equatable {
       List<int> buffer = List<int>.from(
           json['id']['data'].map((model) => int.parse(model.toString())));
 
+      List<Transaction> transactions =
+          ((json['transactions'] ?? []) as List<dynamic>)
+              .map((e) => Transaction.fromJson(e))
+              .toList();
+
       return Account(
         id: Uuid.unparse(buffer),
         name: json['name'],
@@ -38,6 +46,7 @@ class Account extends Equatable {
         currentBalance: currentBalance,
         budget: budget,
         isFavorite: json['isFavorite'],
+        transactions: transactions,
       );
     } on Exception catch (e) {
       throw FormatException('Failed to load account. ${e.toString()}');
@@ -70,4 +79,60 @@ class Account extends Equatable {
   @override
   List<Object?> get props =>
       [id, name, description, currentBalance, isFavorite, budget];
+}
+
+@JsonSerializable()
+class Transaction extends Equatable {
+  const Transaction({
+    required this.id,
+    required this.description,
+    required this.value,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String description;
+  final double value;
+  final DateTime createdAt;
+
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    try {
+      double value =
+          json['value'] is int ? json['value'].toDouble() : json['value'];
+
+      List<int> buffer = List<int>.from(
+          json['id']['data'].map((model) => int.parse(model.toString())));
+
+      return Transaction(
+        id: Uuid.unparse(buffer),
+        description: json['description'] as String,
+        value: value,
+        createdAt: DateTime.parse(json['createdAt'] as String),
+      );
+    } on Exception catch (e) {
+      throw FormatException('Failed to load transaction. ${e.toString()}');
+    }
+  }
+
+  Transaction copyWith({
+    String? id,
+    String? description,
+    double? value,
+    DateTime? createdAt,
+  }) {
+    return Transaction(
+      id: id ?? this.id,
+      description: description ?? this.description,
+      value: value ?? this.value,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  toString() {
+    return [id, description, value, createdAt.toIso8601String()].join(',');
+  }
+
+  @override
+  List<Object?> get props => [id, description, value, createdAt];
 }

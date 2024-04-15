@@ -38,8 +38,7 @@ class AccountsSectionState extends State<AccountsSection> {
     });
   }
 
-  void onDelete(BuildContext context,
-      {required String id, required String name}) {
+  void onDelete({required String id, required String name}) {
     showAlertDialog(context,
         title: 'remove account',
         content:
@@ -68,7 +67,7 @@ class AccountsSectionState extends State<AccountsSection> {
     // implement
   }
 
-  Widget buildList(BuildContext context) {
+  Widget buildList() {
     return BlocBuilder<AccountsBloc, AccountState>(builder: (context, state) {
       return RefreshIndicator(
           child: Column(
@@ -127,7 +126,7 @@ class AccountsSectionState extends State<AccountsSection> {
 
                           return AccountUI(
                               account: accountData,
-                              onDelete: () => onDelete(context,
+                              onDelete: () => onDelete(
                                   id: accountData.id, name: accountData.name));
                         }
                       })),
@@ -156,7 +155,7 @@ class AccountsSectionState extends State<AccountsSection> {
             }
           }),
         child: Container(
-          child: buildList(context),
+          child: buildList(),
         ));
   }
 }
