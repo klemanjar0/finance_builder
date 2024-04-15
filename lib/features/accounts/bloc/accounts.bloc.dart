@@ -33,6 +33,12 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
   final AccountsRepository _accountsRepository;
   final int _limit = 15;
 
+  void initOnLoadMore(void Function(void Function()) cb) {
+    cb(() {
+      add(const AccountEventGetListRequested(loadMore: true));
+    });
+  }
+
   void _onAccountEventSetSort(
       AccountEventSetSort event, Emitter<AccountState> emit) {
     emit(state.setSort(event.sortOption));
@@ -133,8 +139,15 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
       return;
     }
 
+    if (!event.loadMore) {
+      emit(state.resetData());
+    }
+
+    if (event.loadMore && state.total == state.accounts.length) {
+      return;
+    }
+
     emit(state.resetError());
-    emit(state.resetData());
     emit(state.setFetching(true));
 
     try {

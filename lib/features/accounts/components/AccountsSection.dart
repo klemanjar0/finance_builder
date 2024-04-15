@@ -21,6 +21,7 @@ class AccountsSection extends StatefulWidget {
 
 class AccountsSectionState extends State<AccountsSection> {
   final _scrollController = ScrollController();
+  void Function()? loadMoreCallback;
 
   @override
   void initState() {
@@ -31,6 +32,7 @@ class AccountsSectionState extends State<AccountsSection> {
         bool isTop = _scrollController.position.pixels == 0;
         if (!isTop) {
           print('At the bottom');
+          loadMoreCallback!();
         }
       }
     });
@@ -145,7 +147,14 @@ class AccountsSectionState extends State<AccountsSection> {
     return BlocProvider.value(
         value: context.read<AccountsBloc>()
           ..add(const AccountEventGetListRequested(
-              loadMore: false, autoTriggered: true)),
+              loadMore: false, autoTriggered: true))
+          ..initOnLoadMore((loadMoreFn) {
+            if (loadMoreCallback == null) {
+              setState(() {
+                loadMoreCallback = loadMoreFn;
+              });
+            }
+          }),
         child: Container(
           child: buildList(context),
         ));

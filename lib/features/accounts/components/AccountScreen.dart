@@ -339,7 +339,7 @@ class AccountScreenState extends State<AccountScreen>
                         );
                       },
                     ),
-                  )
+                  ),
                 ],
               ),
             )),
