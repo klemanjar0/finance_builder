@@ -4,6 +4,7 @@ import 'package:finance_builder/features/accounts/bloc/accounts.events.dart';
 import 'package:finance_builder/features/accounts/bloc/accounts.models.dart';
 import 'package:finance_builder/features/accounts/bloc/accounts.state.dart';
 import 'package:finance_builder/features/accounts/bloc/types.dart';
+import 'package:finance_builder/features/accounts/components/TransactionItem.dart';
 import 'package:finance_builder/theme/index.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,8 @@ class AccountScreenState extends State<AccountScreen>
 
   @override
   void initState() {
+    context.read<AccountsBloc>().add(AccountEventGetSingleAccountRequested(
+        payload: GetSingleAccountRequestPayload(id: widget.id)));
     _scrollController.addListener(_scrollListener);
     controller = AnimationController(
         vsync: this, animationBehavior: AnimationBehavior.normal)
@@ -121,40 +124,6 @@ class AccountScreenState extends State<AccountScreen>
     );
   }
 
-  Widget _renderTransaction(Transaction item) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Text(
-                '\$ ${item.value}',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineLarge!
-                    .apply(color: Theme.of(context).colorScheme.primary),
-              )
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'expense type (in dev)',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              Text(
-                DateFormat('dd MMM yyyy, HH:MM').format(item.createdAt),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-
   Widget _renderHeader(bool? showTitle, String? title) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -181,10 +150,13 @@ class AccountScreenState extends State<AccountScreen>
           },
         ),
         if (showTitle == true)
-          Text(
-            title ?? '',
-            style: Theme.of(context).textTheme.titleMedium?.apply(
-                fontSizeDelta: 4, fontWeightDelta: 3, color: Colors.white),
+          Expanded(
+            child: Text(
+              title ?? '',
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium?.apply(
+                  fontSizeDelta: 4, fontWeightDelta: 3, color: Colors.white),
+            ),
           ),
         BlocBuilder<AccountsBloc, AccountState>(builder: (context, state) {
           return GestureDetector(
@@ -225,9 +197,7 @@ class AccountScreenState extends State<AccountScreen>
     final double value =
         _scrollPosition > 140 ? _scrollPosition + safePadding : -100.0;
     return BlocProvider.value(
-        value: context.read<AccountsBloc>()
-          ..add(AccountEventGetSingleAccountRequested(
-              payload: GetSingleAccountRequestPayload(id: widget.id))),
+        value: context.read<AccountsBloc>(),
         child: BlocListener<AccountsBloc, AccountState>(
           listener: _onBlocListen,
           child: Scaffold(
@@ -470,7 +440,11 @@ class AccountScreenState extends State<AccountScreen>
                                         fontWeightDelta: 2),
                               ),
                               TextButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    GoRouter.of(context).pushNamed(
+                                        'createTransactionScreen',
+                                        pathParameters: {'id': widget.id});
+                                  },
                                   child: const Icon(
                                     Icons.add,
                                     color: Colors.white,
@@ -481,8 +455,11 @@ class AccountScreenState extends State<AccountScreen>
                         ),
                         BlocBuilder<AccountsBloc, AccountState>(
                             builder: (context, state) {
+                          if (state.singleFetching == true) {
+                            return const CircularProgressIndicator();
+                          }
                           if (state.single == null) {
-                            return const Text('Failed to load transactions');
+                            return const Text('no expenses yet');
                           }
                           return Container(
                             padding: EdgeInsets.symmetric(
@@ -494,8 +471,10 @@ class AccountScreenState extends State<AccountScreen>
                                     i++)
                                   Column(
                                     children: [
-                                      _renderTransaction(
-                                          state.single!.transactions[i]),
+                                      TransactionUI(
+                                          transaction:
+                                              state.single!.transactions[i],
+                                          onDelete: () {}),
                                       i == state.single!.transactions.length - 1
                                           ? SizedBox()
                                           : Divider()

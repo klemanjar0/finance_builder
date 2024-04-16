@@ -28,10 +28,72 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
         _onAccountEventGetSingleAccountFailed);
     on<AccountEventResetAccountError>(_onAccountEventResetAccountError);
     on<AccountEventResetSingleAccount>(_onAccountEventResetSingleAccount);
+    on<AccountEventCreateTransactionRequested>(
+        _onAccountEventCreateTransactionRequested);
+    on<AccountEventSummaryRequested>(_onAccountEventSummaryRequested);
+    on<AccountEventSummarySuccess>(_onAccountEventSummarySuccess);
+    on<AccountEventSummaryFailed>(_onAccountEventSummaryFailed);
   }
 
   final AccountsRepository _accountsRepository;
   final int _limit = 15;
+
+  void _onAccountEventSummaryRequested(
+      AccountEventSummaryRequested event, Emitter<AccountState> emit) async {
+    emit(state.copyWithSummary(
+      summaryFetching: true,
+      summaryError: null,
+    ));
+
+    try {
+      var summary = await _accountsRepository.getSummary();
+
+      add(AccountEventSummarySuccess(summary: summary));
+    } on Exception catch (e) {
+      showToast('Failed to load summary: ${e.toString()}');
+      add(AccountEventSummaryFailed(errorMessage: e.toString()));
+    }
+  }
+
+  void _onAccountEventSummarySuccess(
+      AccountEventSummarySuccess event, Emitter<AccountState> emit) {
+    emit(state.copyWithSummary(
+      summaryFetching: false,
+      summaryError: null,
+      summary: event.summary,
+    ));
+  }
+
+  void _onAccountEventSummaryFailed(
+      AccountEventSummaryFailed event, Emitter<AccountState> emit) {
+    emit(state.copyWithSummary(
+      summaryFetching: false,
+      summaryError: event.errorMessage,
+      summary: null,
+    ));
+  }
+
+  void _onAccountEventCreateTransactionRequested(
+      AccountEventCreateTransactionRequested event,
+      Emitter<AccountState> emit) async {
+    emit(state.resetSingleError());
+    emit(state.setSingleFetching(true));
+
+    try {
+      await _accountsRepository.createTransaction(event.payload);
+
+      add(AccountEventGetSingleAccountRequested(
+          payload:
+              GetSingleAccountRequestPayload(id: event.payload.accountId)));
+      add(const AccountEventGetListRequested(
+          loadMore: false, autoTriggered: false));
+      add(const AccountEventSummaryRequested());
+    } on Exception catch (e) {
+      showToast('Failed to create transaction: ${e.toString()}');
+    } finally {
+      emit(state.setSingleFetching(false));
+    }
+  }
 
   void initOnLoadMore(void Function(void Function()) cb) {
     cb(() {
@@ -68,10 +130,7 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
   void _onAccountEventGetSingleAccountRequested(
       AccountEventGetSingleAccountRequested event,
       Emitter<AccountState> emit) async {
-    if (state.single != null) {
-      return;
-    }
-
+    emit(state.setSingle(null));
     emit(state.resetSingleError());
     emit(state.setSingleFetching(true));
 

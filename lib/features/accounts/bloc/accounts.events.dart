@@ -135,3 +135,38 @@ final class AccountEventResetSingleAccount extends AccountEvent {
   @override
   List<Object> get props => [];
 }
+
+final class AccountEventCreateTransactionRequested extends AccountEvent {
+  const AccountEventCreateTransactionRequested({required this.payload});
+
+  final AccountsCreateTransactionRequestPayload payload;
+
+  @override
+  List<Object> get props => [payload.value, payload.description, payload.type];
+}
+
+final class AccountEventSummaryRequested extends AccountEvent {
+  const AccountEventSummaryRequested();
+
+  @override
+  List<Object> get props => [];
+}
+
+final class AccountEventSummarySuccess extends AccountEvent {
+  const AccountEventSummarySuccess({required this.summary});
+
+  final Summary summary;
+
+  @override
+  List<Object> get props =>
+      [summary.totalBudget, summary.totalSpent, summary.totalSpentThisMonth];
+}
+
+final class AccountEventSummaryFailed extends AccountEvent {
+  const AccountEventSummaryFailed({required this.errorMessage});
+
+  final String errorMessage;
+
+  @override
+  List<Object> get props => [errorMessage];
+}

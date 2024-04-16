@@ -1,4 +1,5 @@
 import 'package:finance_builder/features/accounts/components/AccountScreen.dart';
+import 'package:finance_builder/features/accounts/screens/CreateTransactionScreen.dart';
 import 'package:finance_builder/features/auth/screens/sign_screen/SignScreen.dart';
 import 'package:finance_builder/features/dashboard/dashboard.dart';
 import 'package:finance_builder/features/splash/screens/SplashScreen.dart';
@@ -45,6 +46,11 @@ final router = GoRouter(
             builder: (context, state) =>
                 AccountScreen(id: state.pathParameters['id']!),
           ),
+          GoRoute(
+              path: 'dashboard/createTransactionScreen/:id',
+              name: 'createTransactionScreen',
+              builder: (context, state) =>
+                  CreateTransactionScreen(id: state.pathParameters['id']!))
         ]),
   ],
 );

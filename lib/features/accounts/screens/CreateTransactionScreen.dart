@@ -12,18 +12,20 @@ import '../bloc/accounts.models.dart';
 import '../bloc/accounts.repository.dart';
 import '../bloc/types.dart';
 
-class CreateAccountScreen extends StatefulWidget {
-  const CreateAccountScreen({super.key});
+class CreateTransactionScreen extends StatefulWidget {
+  const CreateTransactionScreen({super.key, required this.id});
+
+  final String id;
 
   @override
-  CreateAccountScreenState createState() => CreateAccountScreenState();
+  CreateTransactionScreenState createState() => CreateTransactionScreenState();
 }
 
-class CreateAccountScreenState extends State<CreateAccountScreen> {
+class CreateTransactionScreenState extends State<CreateTransactionScreen> {
   String? error;
-  final _nameController = TextEditingController();
+  final _typeController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _budgetController = TextEditingController();
+  final _valueController = TextEditingController();
 
   @override
   void initState() {
@@ -36,21 +38,21 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
     });
   }
 
-  String? validate(String name, String description, String budget) {
-    if (name.isEmpty) {
-      return 'name is empty';
+  String? validate(String type, String description, String value) {
+    if (type.isEmpty) {
+      return 'type is empty';
     }
 
     if (description.isEmpty) {
       return 'description is empty';
     }
 
-    if (budget.isEmpty) {
-      return 'budget is empty';
+    if (value.isEmpty) {
+      return 'value is empty';
     }
 
-    if (double.tryParse(budget) == null) {
-      return 'budget is empty';
+    if (double.tryParse(value) == null) {
+      return 'value is empty';
     }
 
     return null;
@@ -58,11 +60,11 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
 
   void onCreate() {
     resetError();
-    var name = _nameController.value.text;
+    var type = _typeController.value.text;
     var description = _descriptionController.value.text;
-    var budget = _budgetController.value.text;
+    var budget = _valueController.value.text;
 
-    var message = validate(name, description, budget);
+    var message = validate(type, description, budget);
 
     if (message != null) {
       setState(() {
@@ -71,11 +73,12 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
       return;
     }
 
-    context.read<AccountsBloc>().add(AccountEventCreateRequested(
-        payload: AccountsCreateRequestPayload(
-            name: name,
+    context.read<AccountsBloc>().add(AccountEventCreateTransactionRequested(
+        payload: AccountsCreateTransactionRequestPayload(
+            type: type,
             description: description,
-            budget: double.parse(budget))));
+            value: double.parse(budget),
+            accountId: widget.id)));
 
     GoRouter.of(context).pop();
   }
@@ -86,7 +89,7 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
       value: context.read<AccountsBloc>(),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Create Account'),
+          title: const Text('new expense'),
         ),
         body: SafeArea(
             child: Container(
@@ -98,16 +101,30 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
             children: [
               TextFormField(
                 style: Theme.of(context).textTheme.bodyMedium,
-                controller: _nameController,
+                controller: _valueController,
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly
+                ],
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.money),
+                  labelText: 'value',
+                  labelStyle: Theme.of(context).textTheme.bodyMedium,
+                  hintText: 'how much did we spend today?',
+                ),
+              ),
+              TextFormField(
+                style: Theme.of(context).textTheme.bodyMedium,
+                controller: _typeController,
                 maxLength: 64,
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.singleLineFormatter
                 ],
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.text_fields),
-                  labelText: 'name',
+                  prefixIcon: const Icon(Icons.type_specimen),
+                  labelText: 'type',
                   labelStyle: Theme.of(context).textTheme.bodyMedium,
-                  hintText: 'we will need an account name',
+                  hintText: 'expense type',
                 ),
               ),
               TextFormField(
@@ -120,20 +137,6 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
                   labelText: 'description',
                   labelStyle: Theme.of(context).textTheme.bodyMedium,
                   hintText: 'maybe anything specific',
-                ),
-              ),
-              TextFormField(
-                style: Theme.of(context).textTheme.bodyMedium,
-                controller: _budgetController,
-                keyboardType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.description),
-                  labelText: 'budget',
-                  labelStyle: Theme.of(context).textTheme.bodyMedium,
-                  hintText: 'do we have limits?',
                 ),
               ),
               const SizedBox(
@@ -168,8 +171,8 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
                               strokeWidth: 3,
                             ),
                           )
-                        : const Icon(Icons.login_outlined),
-                    label: const Text('wanna new account!'));
+                        : const Icon(Icons.attach_money),
+                    label: const Text('submit my money loss..'));
               }),
             ],
           ),

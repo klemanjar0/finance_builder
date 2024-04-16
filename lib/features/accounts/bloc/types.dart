@@ -20,6 +20,19 @@ final class AccountsCreateRequestPayload {
   final double budget;
 }
 
+final class AccountsCreateTransactionRequestPayload {
+  const AccountsCreateTransactionRequestPayload(
+      {required this.description,
+      required this.accountId,
+      required this.type,
+      required this.value});
+
+  final String accountId;
+  final String description;
+  final String type;
+  final double value;
+}
+
 final class AccountsRemoveRequestPayload {
   const AccountsRemoveRequestPayload({required this.id});
 

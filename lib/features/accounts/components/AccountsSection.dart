@@ -27,6 +27,15 @@ class AccountsSectionState extends State<AccountsSection> {
   void initState() {
     super.initState();
 
+    context.read<AccountsBloc>()
+      ..add(const AccountEventGetListRequested(
+          loadMore: false, autoTriggered: true))
+      ..initOnLoadMore((loadMoreFn) {
+        setState(() {
+          loadMoreCallback = loadMoreFn;
+        });
+      });
+
     _scrollController.addListener(() {
       if (_scrollController.position.atEdge) {
         bool isTop = _scrollController.position.pixels == 0;
@@ -105,6 +114,11 @@ class AccountsSectionState extends State<AccountsSection> {
                               ]));
                     },
                   )),
+              if (state.accounts.isEmpty && !state.fetching)
+                Container(
+                  padding: EdgeInsets.all(16),
+                  child: Text('no accounts yet'),
+                ),
               Expanded(
                   child: ListView.builder(
                       controller: _scrollController,
@@ -144,16 +158,7 @@ class AccountsSectionState extends State<AccountsSection> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-        value: context.read<AccountsBloc>()
-          ..add(const AccountEventGetListRequested(
-              loadMore: false, autoTriggered: true))
-          ..initOnLoadMore((loadMoreFn) {
-            if (loadMoreCallback == null) {
-              setState(() {
-                loadMoreCallback = loadMoreFn;
-              });
-            }
-          }),
+        value: context.read<AccountsBloc>(),
         child: Container(
           child: buildList(),
         ));

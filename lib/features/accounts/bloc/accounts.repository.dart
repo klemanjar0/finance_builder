@@ -22,6 +22,17 @@ class AccountsRepository {
   }
 
   Future<Account> getAccount(GetSingleAccountRequestPayload payload) async {
-    return _accountApi.getAccount(payload);
+    var account = await _accountApi.getAccount(payload);
+    var transactions = await _accountApi.getTransactions(payload);
+    return account.copyWith(transactions: transactions);
+  }
+
+  Future<void> createTransaction(
+      AccountsCreateTransactionRequestPayload payload) async {
+    return _accountApi.createTransaction(payload);
+  }
+
+  Future<Summary> getSummary() async {
+    return _accountApi.getSummary();
   }
 }

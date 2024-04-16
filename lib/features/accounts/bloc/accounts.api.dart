@@ -11,6 +11,11 @@ abstract class AccountApi {
   Future<void> createAccount(AccountsCreateRequestPayload payload);
   Future<void> removeAccount(AccountsRemoveRequestPayload payload);
   Future<Account> getAccount(GetSingleAccountRequestPayload payload);
+  Future<List<Transaction>> getTransactions(
+      GetSingleAccountRequestPayload payload);
+  Future<void> createTransaction(
+      AccountsCreateTransactionRequestPayload payload);
+  Future<Summary> getSummary();
 }
 
 class AccountNetworkApi implements AccountApi {
@@ -64,5 +69,51 @@ class AccountNetworkApi implements AccountApi {
         .fetch(endpoint: Endpoint.deleteAccount, extra: {'id': payload.id});
 
     return;
+  }
+
+  @override
+  Future<void> createTransaction(
+      AccountsCreateTransactionRequestPayload payload) async {
+    final Map<String, dynamic> body = {
+      'value': payload.value,
+      'description': payload.description,
+      'type': payload.type
+    };
+
+    await _networkService.fetch(
+        endpoint: Endpoint.createTransaction,
+        data: body,
+        extra: {'id': payload.accountId});
+
+    return;
+  }
+
+  @override
+  Future<List<Transaction>> getTransactions(
+      GetSingleAccountRequestPayload payload) async {
+    final queryParams = {
+      'limit': 1000.toString(),
+      'offset': 0.toString(),
+    };
+    var response = await _networkService.fetch(
+        endpoint: Endpoint.getTransactions,
+        extra: {'id': payload.id},
+        queryParams: queryParams);
+
+    var parsed = (response['data'] as List<dynamic>)
+        .map((e) => Transaction.fromJson(e))
+        .toList();
+
+    return parsed;
+  }
+
+  @override
+  Future<Summary> getSummary() async {
+    var response =
+        await _networkService.fetch(endpoint: Endpoint.getSummary, data: {});
+
+    var parsed = Summary.fromJson(response);
+
+    return parsed;
   }
 }

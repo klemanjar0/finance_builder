@@ -1,3 +1,4 @@
+import 'package:finance_builder/features/dashboard/MainDash.dart';
 import 'package:finance_builder/features/navigation/bottomNavBar.dart';
 import 'package:finance_builder/utils/utility.dart';
 import 'package:flutter/material.dart';
@@ -8,9 +9,7 @@ import '../accounts/components/AccountsSection.dart';
 Widget getContentByTab(DashboardBottomTab tab) {
   switch (tab) {
     case DashboardBottomTab.home:
-      return const Text(
-        'Home',
-      );
+      return MainDash();
     case DashboardBottomTab.accounts:
       return AccountsSection();
     case DashboardBottomTab.settings:

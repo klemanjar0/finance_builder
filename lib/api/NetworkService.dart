@@ -22,7 +22,10 @@ enum Endpoint {
   createAccount,
   updateAccount,
   deleteAccount,
-  getAccount
+  getAccount,
+  createTransaction,
+  getTransactions,
+  getSummary,
 }
 
 typedef ApiResponse = http.Response;
@@ -63,6 +66,18 @@ Map<Endpoint, EndpointConfig Function(Map<String, String>?)> _accountEndpoints =
     var id = extra?['id'];
     return EndpointConfig(path: '/accounts/$id', type: RequestType.delete);
   },
+  Endpoint.createTransaction: (extra) {
+    var id = extra?['id'];
+    return EndpointConfig(
+        path: '/accounts/$id/transactions', type: RequestType.post);
+  },
+  Endpoint.getTransactions: (extra) {
+    var id = extra?['id'];
+    return EndpointConfig(
+        path: '/accounts/$id/transactions', type: RequestType.get);
+  },
+  Endpoint.getSummary: (_) =>
+      const EndpointConfig(path: '/accounts/summary', type: RequestType.post),
 };
 
 final Map<Endpoint, EndpointConfig Function(Map<String, String>?)> _endpoints =
