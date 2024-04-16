@@ -401,7 +401,7 @@ class AccountScreenState extends State<AccountScreen>
                                 return AnimatedTextKit(
                                   animatedTexts: [
                                     TypewriterAnimatedText(
-                                      'Loading...',
+                                      'loading...',
                                       textStyle: TextStyle(
                                           fontSize: 18.0,
                                           fontWeight: FontWeight.bold,
@@ -513,12 +513,12 @@ class AccountScreenState extends State<AccountScreen>
                     BlocBuilder<AccountsBloc, AccountState>(
                         builder: (context, state) {
                       return AnimatedPositioned(
-                        top: value - 250,
+                        top: value - 950,
                         right: 0,
                         left: 0,
                         duration: const Duration(milliseconds: 150),
                         child: Container(
-                          height: 300,
+                          height: 1000,
                           alignment: Alignment.bottomCenter,
                           decoration: const BoxDecoration(
                             borderRadius: BorderRadius.only(

@@ -46,24 +46,24 @@ class BottomNavBarState extends State<BottomNavBar> {
               BottomNavigationBarItem(
                 icon: const Icon(Icons.home_outlined),
                 activeIcon: const Icon(Icons.home),
-                label: 'Dashboard',
+                label: 'dashboard',
                 backgroundColor: Theme.of(context).colorScheme.background,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.account_balance_wallet_outlined),
                 activeIcon: const Icon(Icons.account_balance_wallet),
-                label: 'Accounts',
+                label: 'accounts',
                 backgroundColor: Theme.of(context).colorScheme.background,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.settings_outlined),
                 activeIcon: const Icon(Icons.settings),
-                label: 'Settings',
+                label: 'settings',
                 backgroundColor: Theme.of(context).colorScheme.background,
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.logout),
-                label: 'Log Out',
+                label: 'log Out',
                 backgroundColor: Theme.of(context).colorScheme.background,
               ),
             ],
