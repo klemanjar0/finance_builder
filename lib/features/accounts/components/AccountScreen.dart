@@ -195,7 +195,7 @@ class AccountScreenState extends State<AccountScreen>
     final safePadding = MediaQuery.of(context).padding.top;
     final safePaddingBot = MediaQuery.of(context).padding.top;
     final double value =
-        _scrollPosition > 140 ? _scrollPosition + safePadding : -100.0;
+        _scrollPosition > 80 ? _scrollPosition + safePadding : -100.0;
     return BlocProvider.value(
         value: context.read<AccountsBloc>(),
         child: BlocListener<AccountsBloc, AccountState>(

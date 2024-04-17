@@ -72,6 +72,18 @@ class Account extends Equatable {
     );
   }
 
+  static Account empty() {
+    return Account(
+      id: '',
+      name: '',
+      description: '',
+      currentBalance: 0,
+      isFavorite: false,
+      budget: 0,
+      transactions: [],
+    );
+  }
+
   @override
   toString() {
     return [

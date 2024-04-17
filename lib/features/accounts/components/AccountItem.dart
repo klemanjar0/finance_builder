@@ -1,5 +1,8 @@
+import 'package:finance_builder/features/accounts/bloc/accounts.bloc.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../bloc/accounts.models.dart';
@@ -52,127 +55,116 @@ class AccountUIState extends State<AccountUI> with TickerProviderStateMixin {
         .pushNamed('accountDetails', pathParameters: {'id': widget.account.id});
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _renderAdditionalInfo(Account account) {
     return Container(
-        child: GestureDetector(
-            onTap: () {
-              goToDetails();
-            },
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Flexible(
-                            child: Padding(
-                          padding: EdgeInsets.only(left: 8),
-                          child: Text(
-                            widget.account.name,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.apply(
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
-                          ),
-                        )),
-                        TextButton(
-                            onPressed: widget.onDelete,
-                            child: const Icon(Icons.delete_outline,
-                                color: Colors.grey))
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Flexible(
-                            child: Padding(
-                          padding: EdgeInsets.only(left: 8, top: 4),
-                          child: Text(
-                            widget.account.description,
-                            softWrap: true,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
-                                ?.apply(
-                                    color:
-                                        Theme.of(context).colorScheme.outline),
-                          ),
-                        )),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 48,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(left: 8, top: 4),
-                          child: Text(
-                            'you spent:',
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.apply(
-                                    color:
-                                        Theme.of(context).colorScheme.primary),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 8, top: 4),
-                          child: Text(
-                            '${widget.account.currentBalance}',
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.apply(
-                                    color: budgetExceed
-                                        ? Theme.of(context).colorScheme.error
-                                        : Theme.of(context).colorScheme.primary,
-                                    fontWeightDelta: 2),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 4, bottom: 4),
-                          child: Text(
-                            '/${widget.account.budget}',
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
-                                ?.apply(
-                                    color:
-                                        Theme.of(context).colorScheme.outline),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                      child: LinearProgressIndicator(
-                        value: controller.value,
-                        color: budgetExceed
-                            ? Theme.of(context).colorScheme.error
-                            : Theme.of(context).colorScheme.primary,
-                        semanticsLabel: 'Linear progress indicator',
-                      ),
-                    )
-                  ],
+      width: 100,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  '${account.currentBalance.toInt()}',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: budgetExceed ? CupertinoColors.destructiveRed : null,
+                  ),
                 ),
               ),
-            )));
+              Flexible(
+                child: Text(
+                  '${account.budget.toInt()}',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11),
+                ),
+              ),
+            ],
+          ),
+          LinearProgressIndicator(
+            value: controller.value,
+            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            color: budgetExceed
+                ? CupertinoColors.destructiveRed
+                : CupertinoColors.activeBlue,
+            semanticsLabel: 'Linear progress indicator',
+          )
+        ],
+      ),
+    );
+  }
+
+  Future<bool?> _showAlertDialog() {
+    return showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+            'Proceed with account delete? It will cause loss of all transactions.'),
+        actions: <CupertinoDialogAction>[
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () {
+              Navigator.pop(context, false);
+            },
+            child: const Text('No'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dismissible(
+        key: ValueKey<String>(widget.account.id),
+        direction: DismissDirection.endToStart,
+        onDismissed: (DismissDirection direction) {
+          widget.onDelete();
+        },
+        background: Container(
+          padding: EdgeInsets.only(right: 16),
+          alignment: Alignment.centerRight,
+          color: CupertinoColors.destructiveRed,
+          child: Icon(CupertinoIcons.trash, color: CupertinoColors.white),
+        ),
+        confirmDismiss: (DismissDirection direction) async {
+          return await _showAlertDialog();
+        },
+        child: CupertinoListTile(
+          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          title: Text(
+            widget.account.name,
+            style: TextStyle(fontSize: 18),
+          ),
+          subtitle: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Budget: ${widget.account.budget}',
+                style: TextStyle(fontSize: 14),
+              ),
+              Text(
+                'Spent: ${widget.account.currentBalance}',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: budgetExceed ? CupertinoColors.destructiveRed : null,
+                ),
+              )
+            ],
+          ),
+          onTap: goToDetails,
+          additionalInfo: _renderAdditionalInfo(widget.account),
+          trailing: const CupertinoListTileChevron(),
+        ));
   }
 }

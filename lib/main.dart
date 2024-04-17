@@ -8,6 +8,7 @@ import 'package:finance_builder/features/user/bloc/user.api.dart';
 import 'package:finance_builder/features/user/bloc/user.bloc.dart';
 import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:finance_builder/theme/index.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -49,15 +50,19 @@ class MyApp extends StatelessWidget {
         RepositoryProvider.value(value: userRepository),
         RepositoryProvider.value(value: autoLogoutService),
       ],
-      child: MultiBlocProvider(providers: [
-        BlocProvider<UserBloc>(
-            create: (_) => UserBloc(
-                  userRepository: userRepository,
-                  autoLogoutService: autoLogoutService,
-                )),
-        BlocProvider<AccountsBloc>(
-            create: (_) => AccountsBloc(accountsRepository: accountRepository))
-      ], child: MaterialApp.router(routerConfig: router, theme: themeData)),
+      child: MultiBlocProvider(
+          providers: [
+            BlocProvider<UserBloc>(
+                create: (_) => UserBloc(
+                      userRepository: userRepository,
+                      autoLogoutService: autoLogoutService,
+                    )),
+            BlocProvider<AccountsBloc>(
+                create: (_) =>
+                    AccountsBloc(accountsRepository: accountRepository))
+          ],
+          child: CupertinoApp.router(
+              routerConfig: router, theme: cupertinoThemeData)),
     );
   }
 }

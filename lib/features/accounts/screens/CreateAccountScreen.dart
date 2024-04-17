@@ -1,4 +1,5 @@
 import 'package:finance_builder/features/accounts/bloc/accounts.state.dart';
+import 'package:finance_builder/utils/utility.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -20,7 +21,6 @@ class CreateAccountScreen extends StatefulWidget {
 }
 
 class CreateAccountScreenState extends State<CreateAccountScreen> {
-  String? error;
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _budgetController = TextEditingController();
@@ -28,12 +28,6 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
   @override
   void initState() {
     super.initState();
-  }
-
-  resetError() {
-    setState(() {
-      error = null;
-    });
   }
 
   String? validate(String name, String description, String budget) {
@@ -57,7 +51,6 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
   }
 
   void onCreate() {
-    resetError();
     var name = _nameController.value.text;
     var description = _descriptionController.value.text;
     var budget = _budgetController.value.text;
@@ -65,9 +58,7 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
     var message = validate(name, description, budget);
 
     if (message != null) {
-      setState(() {
-        error = message;
-      });
+      showValidationError(message);
       return;
     }
 
@@ -80,97 +71,93 @@ class CreateAccountScreenState extends State<CreateAccountScreen> {
     GoRouter.of(context).pop();
   }
 
+  void showValidationError(String message) {
+    showCupertinoAlertDialog(context,
+        title: 'Validation Error',
+        content: message,
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Ok'),
+          )
+        ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: context.read<AccountsBloc>(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Create Account'),
+      child: CupertinoPageScaffold(
+        navigationBar: CupertinoNavigationBar(
+          leading: CupertinoNavigationBarBackButton(),
+          middle: Text('Create Account'),
+          trailing: BlocBuilder<AccountsBloc, AccountState>(
+              builder: (context, state) {
+            return GestureDetector(
+              onTap: state.fetching ? null : onCreate,
+              child: const Text(
+                'Create',
+                style: TextStyle(color: CupertinoColors.activeBlue),
+              ),
+            );
+          }),
         ),
-        body: SafeArea(
+        child: SafeArea(
             child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              TextFormField(
-                style: Theme.of(context).textTheme.bodyMedium,
-                controller: _nameController,
-                maxLength: 64,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.singleLineFormatter
-                ],
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.text_fields),
-                  labelText: 'name',
-                  labelStyle: Theme.of(context).textTheme.bodyMedium,
-                  hintText: 'we will need an account name',
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: CupertinoTextField.borderless(
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  controller: _nameController,
+                  maxLength: 64,
+                  placeholder: 'Account Name',
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.singleLineFormatter
+                  ],
                 ),
               ),
-              TextFormField(
-                style: Theme.of(context).textTheme.bodyMedium,
-                controller: _descriptionController,
-                maxLines: null,
-                maxLength: 8096,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.description),
-                  labelText: 'description',
-                  labelStyle: Theme.of(context).textTheme.bodyMedium,
-                  hintText: 'maybe anything specific',
+              Container(
+                margin: EdgeInsets.only(left: 16),
+                child: Divider(),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: CupertinoTextField.borderless(
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  controller: _descriptionController,
+                  maxLines: null,
+                  placeholder: 'Description',
+                  maxLength: 8096,
                 ),
               ),
-              TextFormField(
-                style: Theme.of(context).textTheme.bodyMedium,
-                controller: _budgetController,
-                keyboardType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.description),
-                  labelText: 'budget',
-                  labelStyle: Theme.of(context).textTheme.bodyMedium,
-                  hintText: 'do we have limits?',
+              Container(
+                margin: EdgeInsets.only(left: 16),
+                child: Divider(),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: CupertinoTextField.borderless(
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  controller: _budgetController,
+                  keyboardType: TextInputType.number,
+                  placeholder: 'Budget',
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly
+                  ],
                 ),
               ),
-              const SizedBox(
-                height: 24,
+              Container(
+                margin: EdgeInsets.only(left: 16),
+                child: Divider(),
               ),
-              Text(
-                error ?? '',
-                textAlign: TextAlign.center,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.apply(color: Theme.of(context).colorScheme.error),
-              ),
-              const SizedBox(
-                height: 24,
-              ),
-              BlocBuilder<AccountsBloc, AccountState>(
-                  builder: (context, state) {
-                return FilledButton.icon(
-                    onPressed: state.fetching
-                        ? null
-                        : () {
-                            onCreate();
-                          },
-                    icon: state.fetching
-                        ? Container(
-                            width: 24,
-                            height: 24,
-                            padding: const EdgeInsets.all(2.0),
-                            child: const CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 3,
-                            ),
-                          )
-                        : const Icon(Icons.login_outlined),
-                    label: const Text('wanna new account!'));
-              }),
             ],
           ),
         )),

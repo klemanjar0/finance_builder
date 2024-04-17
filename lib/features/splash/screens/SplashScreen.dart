@@ -4,6 +4,8 @@ import 'package:finance_builder/features/user/bloc/user.bloc.dart';
 import 'package:finance_builder/features/user/bloc/user.repository.dart';
 import 'package:finance_builder/features/user/bloc/user.state.dart';
 import 'package:finance_builder/main.dart';
+import 'package:finance_builder/theme/index.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -43,16 +45,16 @@ class SplashScreenState extends State<SplashScreen> {
     return BlocProvider.value(
         value: context.read<UserBloc>(),
         child: Scaffold(
-          appBar: AppBar(
-            title: Text(widget.title),
-          ),
           body: Container(
             child: Center(
                 child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const CircularProgressIndicator(),
+                CupertinoActivityIndicator(
+                  color: Theme.of(context).lochmara,
+                  radius: 16,
+                ),
                 const SizedBox(
                   height: 32,
                 ),
@@ -63,7 +65,7 @@ class SplashScreenState extends State<SplashScreen> {
                       textStyle: TextStyle(
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary),
+                          color: Theme.of(context).lochmara),
                       speed: const Duration(milliseconds: 150),
                     ),
                   ],

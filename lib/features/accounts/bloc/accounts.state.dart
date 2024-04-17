@@ -93,6 +93,23 @@ class AccountState extends Equatable {
     );
   }
 
+  AccountState removeAccountById(String id) {
+    var newList = accounts.where((element) => element.id != id).toList();
+    return AccountState(
+      accounts: newList,
+      total: total,
+      fetching: fetching,
+      isLoaded: isLoaded,
+      error: error,
+      sortOption: sortOption,
+      singleFetching: singleFetching,
+      single: single,
+      summaryFetching: summaryFetching,
+      summary: summary,
+      summaryError: summaryError,
+    );
+  }
+
   AccountState resetError() {
     return AccountState(
       accounts: accounts,

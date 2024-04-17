@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -56,5 +57,19 @@ void showAlertDialog(BuildContext context,
     builder: (BuildContext context) {
       return alert;
     },
+  );
+}
+
+Future<T?> showCupertinoAlertDialog<T>(BuildContext context,
+    {required String title,
+    required String content,
+    required List<CupertinoDialogAction> actions}) {
+  return showCupertinoModalPopup<T>(
+    context: context,
+    builder: (BuildContext context) => CupertinoAlertDialog(
+      title: Text(title),
+      content: Text(content),
+      actions: actions,
+    ),
   );
 }

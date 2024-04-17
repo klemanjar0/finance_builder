@@ -1,9 +1,11 @@
 import 'package:finance_builder/components/SortingBottomSheet/SortingBottomSheet.dart';
+import 'package:finance_builder/features/accounts/bloc/accounts.models.dart';
 import 'package:finance_builder/features/accounts/bloc/types.dart';
 import 'package:finance_builder/features/accounts/components/AccountItem.dart';
 import 'package:finance_builder/utils/utility.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -37,121 +39,125 @@ class AccountsSectionState extends State<AccountsSection> {
       });
 
     _scrollController.addListener(() {
-      if (_scrollController.position.atEdge) {
-        bool isTop = _scrollController.position.pixels == 0;
-        if (!isTop) {
-          print('At the bottom');
-          loadMoreCallback!();
-        }
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        loadMoreCallback!();
       }
     });
   }
 
   void onDelete({required String id, required String name}) {
-    showAlertDialog(context,
-        title: 'remove account',
-        content:
-            'are you sure you want delete account $name? this will also lead to removal of all transactions in this account.',
-        buttons: [
-          TextButton(
-            child: Text("chill, bro"),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
-            onPressed: () {
-              GoRouter.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: Text("ok"),
-            onPressed: () {
-              print('here ${id}');
-              context.read<AccountsBloc>().add(AccountEventDeleteRequested(
-                  payload: AccountsRemoveRequestPayload(id: id)));
-              GoRouter.of(context).pop();
-              // do delete
-            },
-          )
-        ]);
+    context.read<AccountsBloc>().add(AccountEventDeleteRequested(
+        payload: AccountsRemoveRequestPayload(id: id)));
     // implement
+  }
+
+  Widget _renderSort(AccountState state) {
+    return Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: CupertinoButton.filled(
+          child: Row(
+            children: [
+              state.sortOption.direction == SortDirection.asc
+                  ? Icon(Icons.arrow_upward)
+                  : Icon(Icons.arrow_downward),
+              Text('sort by ${state.sortOption.field}'),
+            ],
+          ),
+          onPressed: () {
+            showBottomSort(
+                context,
+                BottomSortConfig(
+                    selected: state.sortOption,
+                    onSubmit: (SortOption option) {
+                      context
+                          .read<AccountsBloc>()
+                          .add(AccountEventSetSort(sortOption: option));
+                    },
+                    options: const [
+                      SortParam(field: 'name', label: 'name'),
+                      SortParam(field: 'description', label: 'description'),
+                      SortParam(field: 'budget', label: 'budget'),
+                      SortParam(field: 'currentBalance', label: 'spent')
+                    ]));
+          },
+        ));
+  }
+
+  void _onCreate() {
+    GoRouter.of(context).pushNamed('createAccountScreen');
   }
 
   Widget buildList() {
     return BlocBuilder<AccountsBloc, AccountState>(builder: (context, state) {
-      return RefreshIndicator(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (state.error != null)
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Text(state.error!),
-                ),
-              Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: FilledButton.icon(
-                    icon: state.sortOption.direction == SortDirection.asc
-                        ? Icon(Icons.arrow_upward)
-                        : Icon(Icons.arrow_downward),
-                    label: Text('sort by ${state.sortOption.field}'),
-                    onPressed: () {
-                      showBottomSort(
-                          context,
-                          BottomSortConfig(
-                              selected: state.sortOption,
-                              onSubmit: (SortOption option) {
-                                context.read<AccountsBloc>().add(
-                                    AccountEventSetSort(sortOption: option));
-                              },
-                              options: const [
-                                SortParam(field: 'name', label: 'name'),
-                                SortParam(
-                                    field: 'description', label: 'description'),
-                                SortParam(field: 'budget', label: 'budget'),
-                                SortParam(
-                                    field: 'currentBalance', label: 'spent')
-                              ]));
-                    },
-                  )),
-              if (state.accounts.isEmpty && !state.fetching)
-                Container(
-                  padding: EdgeInsets.all(16),
-                  child: Text('no accounts yet'),
-                ),
-              Expanded(
-                  child: ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(8),
-                      itemCount: state.accounts.length + 1,
-                      itemBuilder: (BuildContext context, int index) {
-                        var array = state.accounts;
-                        if (index == array.length) {
-                          return Visibility(
-                              visible: state.fetching,
-                              child: const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(8),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ));
-                        } else {
-                          var accountData = array[index];
-
-                          return AccountUI(
-                              account: accountData,
-                              onDelete: () => onDelete(
-                                  id: accountData.id, name: accountData.name));
-                        }
-                      })),
-            ],
+      return CustomScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        controller: _scrollController,
+        slivers: <Widget>[
+          CupertinoSliverNavigationBar(
+            backgroundColor: CupertinoColors.secondarySystemBackground,
+            largeTitle: const Text('Accounts'),
+            trailing: GestureDetector(
+              onTap: _onCreate,
+              child: const Icon(
+                CupertinoIcons.add,
+                color: CupertinoColors.black,
+              ),
+            ),
           ),
-          onRefresh: () {
-            context
-                .read<AccountsBloc>()
-                .add(const AccountEventGetListRequested(loadMore: false));
-            return Future(() => null);
-          });
+          CupertinoSliverRefreshControl(
+            onRefresh: () async {
+              context
+                  .read<AccountsBloc>()
+                  .add(const AccountEventGetListRequested(loadMore: false));
+            },
+          ),
+          // if (state.error != null)
+          //   Padding(
+          //     padding: const EdgeInsets.all(8),
+          //     child: Text(state.error!),
+          //   ),
+          // if (state.accounts.isEmpty && !state.fetching)
+          //   Container(
+          //     padding: EdgeInsets.all(16),
+          //     child: Text('no accounts yet'),
+          //   ),
+          SliverList.separated(
+            itemBuilder: (BuildContext context, int index) {
+              var array = state.accounts;
+
+              if (index == array.length) {
+                return Visibility(
+                    visible: state.fetching,
+                    child: const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(8),
+                        child: CupertinoActivityIndicator(
+                          radius: 16,
+                        ),
+                      ),
+                    ));
+              }
+
+              var accountData = array[index];
+
+              return AccountUI(
+                  account: accountData,
+                  onDelete: () =>
+                      onDelete(id: accountData.id, name: accountData.name));
+            },
+            itemCount: (state.accounts.length + (state.fetching ? 1 : 0)),
+            separatorBuilder: (BuildContext context, int index) => Container(
+              height: 0,
+              padding: const EdgeInsets.only(left: 16),
+              child: const Divider(),
+            ),
+          ),
+        ],
+      );
     });
   }
 

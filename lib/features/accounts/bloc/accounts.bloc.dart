@@ -149,6 +149,7 @@ class AccountsBloc extends Bloc<AccountEvent, AccountState> {
   void _onAccountEventDeleteRequested(
       AccountEventDeleteRequested event, Emitter<AccountState> emit) async {
     emit(state.setFetching(true));
+    emit(state.removeAccountById(event.payload.id));
 
     try {
       await _accountsRepository.removeAccount(event.payload);
