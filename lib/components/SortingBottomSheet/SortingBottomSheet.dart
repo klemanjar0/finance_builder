@@ -40,8 +40,9 @@ Future showBottomSort(BuildContext context, BottomSortConfig sortConfig) {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: TextButton(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+      child: CupertinoButton(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           child: Column(
             children: [
               Row(
@@ -49,19 +50,23 @@ Future showBottomSort(BuildContext context, BottomSortConfig sortConfig) {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(option.label,
-                      style: Theme.of(context).textTheme.titleMedium?.apply(
+                      style: TextStyle(
                           color: isSelected
-                              ? Colors.lightGreenAccent
-                              : Colors.lightGreen)),
+                              ? CupertinoColors.activeBlue
+                              : CupertinoColors.inactiveGray)),
                   if (isSelected)
                     Container(
                         child: localSortOption.direction == SortDirection.asc
                             ? const Icon(
                                 Icons.arrow_upward,
-                                color: Colors.lightGreenAccent,
+                                color: CupertinoColors.activeBlue,
+                                size: 20,
                               )
-                            : const Icon(Icons.arrow_downward,
-                                color: Colors.lightGreenAccent))
+                            : const Icon(
+                                Icons.arrow_downward,
+                                color: CupertinoColors.activeBlue,
+                                size: 20,
+                              ))
                 ],
               ),
             ],
@@ -74,21 +79,26 @@ Future showBottomSort(BuildContext context, BottomSortConfig sortConfig) {
 
   final items = sortConfig.options;
 
-  return showModalBottomSheet(
+  return showCupertinoModalPopup(
     context: context,
     builder: (context) {
       return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
         return SingleChildScrollView(
-          padding: EdgeInsets.only(right: 8, left: 8, bottom: 32, top: 8),
+            child: Container(
+          padding: const EdgeInsets.only(bottom: 32, top: 8, left: 8, right: 8),
+          decoration: const BoxDecoration(
+              color: CupertinoColors.lightBackgroundGray,
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(16), topLeft: Radius.circular(16))),
           child: Column(
             children: [
               Container(
                 padding: const EdgeInsets.all(16),
                 width: double.infinity,
-                child: Text('sort by',
-                    style: Theme.of(context).textTheme.titleMedium),
+                child: const Text('Sort By', style: TextStyle(fontSize: 18)),
               ),
+              Divider(),
               for (int i = 0; i < items.length; i++)
                 renderChild(
                     isLast: items.length - 1 == i,
@@ -109,22 +119,22 @@ Future showBottomSort(BuildContext context, BottomSortConfig sortConfig) {
                         }
                       });
                     }),
-              const SizedBox(
-                height: 12,
-              ),
+              Divider(),
               Row(
                 children: [
                   Expanded(
-                      child: ElevatedButton(
+                      child: CupertinoButton(
                           onPressed: () {
                             GoRouter.of(context).pop();
                           },
-                          child: Text('Cancel'))),
-                  const SizedBox(
-                    width: 8,
-                  ),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                                color: CupertinoColors.destructiveRed),
+                          ))),
+                  VerticalDivider(),
                   Expanded(
-                      child: FilledButton(
+                      child: CupertinoButton(
                           onPressed: () {
                             GoRouter.of(context).pop();
                             sortConfig.onSubmit(localSortOption);
@@ -134,7 +144,7 @@ Future showBottomSort(BuildContext context, BottomSortConfig sortConfig) {
               ),
             ],
           ),
-        );
+        ));
       });
     },
   );

@@ -2,6 +2,7 @@ import 'package:finance_builder/components/SortingBottomSheet/SortingBottomSheet
 import 'package:finance_builder/features/accounts/bloc/accounts.models.dart';
 import 'package:finance_builder/features/accounts/bloc/types.dart';
 import 'package:finance_builder/features/accounts/components/AccountItem.dart';
+import 'package:finance_builder/theme/index.dart';
 import 'package:finance_builder/utils/utility.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,17 @@ class AccountsSection extends StatefulWidget {
   AccountsSectionState createState() => AccountsSectionState();
 }
 
+var sortOptions = const [
+  SortParam(field: 'name', label: 'Name'),
+  SortParam(field: 'description', label: 'Description'),
+  SortParam(field: 'budget', label: 'Budget'),
+  SortParam(field: 'currentBalance', label: 'Spent')
+];
+
+String getLabelByValue(String value) {
+  return sortOptions.firstWhere((element) => element.field == value).label;
+}
+
 class AccountsSectionState extends State<AccountsSection> {
   final _scrollController = ScrollController();
   void Function()? loadMoreCallback;
@@ -31,7 +43,7 @@ class AccountsSectionState extends State<AccountsSection> {
 
     context.read<AccountsBloc>()
       ..add(const AccountEventGetListRequested(
-          loadMore: false, autoTriggered: true))
+          loadMore: false, autoTriggered: false))
       ..initOnLoadMore((loadMoreFn) {
         setState(() {
           loadMoreCallback = loadMoreFn;
@@ -52,17 +64,52 @@ class AccountsSectionState extends State<AccountsSection> {
     // implement
   }
 
+  Widget errorGuard(AccountState state) {
+    if (state.error != null) {
+      return Center(
+        child: Text('${state.error}'),
+      );
+    }
+
+    if (!state.fetching && state.accounts.isEmpty) {
+      return const Center(
+        child: Text('No Data Found!'),
+      );
+    }
+
+    return Container();
+  }
+
+  Future<void> onRefresh() {
+    context
+        .read<AccountsBloc>()
+        .add(const AccountEventGetListRequested(loadMore: false));
+    return Future(() => null);
+  }
+
   Widget _renderSort(AccountState state) {
     return Container(
         width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 16),
-        child: CupertinoButton.filled(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: CupertinoButton(
+          color: Theme.of(context).lavender,
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Text(
+                'Sort By ${getLabelByValue(state.sortOption.field)}',
+                style: TextStyle(color: CupertinoColors.systemBlue),
+              ),
+              const SizedBox(width: 4),
               state.sortOption.direction == SortDirection.asc
-                  ? Icon(Icons.arrow_upward)
-                  : Icon(Icons.arrow_downward),
-              Text('sort by ${state.sortOption.field}'),
+                  ? const Icon(
+                      Icons.arrow_upward,
+                      color: CupertinoColors.systemBlue,
+                      size: 20,
+                    )
+                  : const Icon(Icons.arrow_downward,
+                      color: CupertinoColors.systemBlue, size: 20),
             ],
           ),
           onPressed: () {
@@ -75,12 +122,7 @@ class AccountsSectionState extends State<AccountsSection> {
                           .read<AccountsBloc>()
                           .add(AccountEventSetSort(sortOption: option));
                     },
-                    options: const [
-                      SortParam(field: 'name', label: 'name'),
-                      SortParam(field: 'description', label: 'description'),
-                      SortParam(field: 'budget', label: 'budget'),
-                      SortParam(field: 'currentBalance', label: 'spent')
-                    ]));
+                    options: sortOptions));
           },
         ));
   }
@@ -109,22 +151,20 @@ class AccountsSectionState extends State<AccountsSection> {
             ),
           ),
           CupertinoSliverRefreshControl(
-            onRefresh: () async {
-              context
-                  .read<AccountsBloc>()
-                  .add(const AccountEventGetListRequested(loadMore: false));
-            },
+            onRefresh: onRefresh,
           ),
-          // if (state.error != null)
-          //   Padding(
-          //     padding: const EdgeInsets.all(8),
-          //     child: Text(state.error!),
-          //   ),
-          // if (state.accounts.isEmpty && !state.fetching)
-          //   Container(
-          //     padding: EdgeInsets.all(16),
-          //     child: Text('no accounts yet'),
-          //   ),
+          SliverList.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return _renderSort(state);
+            },
+            itemCount: 1,
+          ),
+          SliverList.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return errorGuard(state);
+            },
+            itemCount: 1,
+          ),
           SliverList.separated(
             itemBuilder: (BuildContext context, int index) {
               var array = state.accounts;
