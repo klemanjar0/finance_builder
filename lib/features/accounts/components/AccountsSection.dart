@@ -2,6 +2,7 @@ import 'package:finance_builder/components/SortingBottomSheet/SortingBottomSheet
 import 'package:finance_builder/features/accounts/bloc/accounts.models.dart';
 import 'package:finance_builder/features/accounts/bloc/types.dart';
 import 'package:finance_builder/features/accounts/components/AccountItem.dart';
+import 'package:finance_builder/helpers/mixins/InfiniteScrollMixin.dart';
 import 'package:finance_builder/theme/index.dart';
 import 'package:finance_builder/utils/utility.dart';
 import 'package:flutter/cupertino.dart';
@@ -33,29 +34,25 @@ String getLabelByValue(String value) {
   return sortOptions.firstWhere((element) => element.field == value).label;
 }
 
-class AccountsSectionState extends State<AccountsSection> {
-  final _scrollController = ScrollController();
-  void Function()? loadMoreCallback;
-
+class AccountsSectionState extends State<AccountsSection>
+    with InfiniteScrollMixin {
   @override
   void initState() {
     super.initState();
 
-    context.read<AccountsBloc>()
-      ..add(const AccountEventGetListRequested(
-          loadMore: false, autoTriggered: false))
-      ..initOnLoadMore((loadMoreFn) {
-        setState(() {
-          loadMoreCallback = loadMoreFn;
-        });
-      });
-
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        loadMoreCallback!();
-      }
+    initInfiniteScroll(() {
+      context.read<AccountsBloc>().add(const AccountEventGetListRequested(
+          loadMore: true, autoTriggered: false));
     });
+
+    context.read<AccountsBloc>().add(const AccountEventGetListRequested(
+        loadMore: false, autoTriggered: false));
+  }
+
+  @override
+  void dispose() {
+    disposeInfiniteScroll();
+    super.dispose();
   }
 
   void onDelete({required String id, required String name}) {
@@ -137,7 +134,7 @@ class AccountsSectionState extends State<AccountsSection> {
         physics: const BouncingScrollPhysics(
           parent: AlwaysScrollableScrollPhysics(),
         ),
-        controller: _scrollController,
+        controller: infiniteScrollController,
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: CupertinoColors.secondarySystemBackground,
